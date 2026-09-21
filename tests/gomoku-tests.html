@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>五子棋验证</title>
+<style>body{font:15px/1.65 system-ui;background:#f7f0df;color:#354739;max-width:620px;margin:24px auto;padding:0 18px}li{margin:4px 0}.pass{color:#37603e}.fail{color:#a2392f}#test-fixture{margin-top:24px}</style>
+<h1>五子棋验证</h1>
+<p id="summary">正在验证…</p>
+<ol id="results"></ol>
+<div id="test-fixture"></div>
+<script src="../game/gomoku.js"></script>
+<script id="gomoku-engine-tests">
+(function () {
+  const e = globalThis.WitchGomoku.engine;
+  const results = [];
+  function assert(condition, message) { if (!condition) throw new Error(message || '断言失败'); }
+  function test(name, run) {
+    try { run(); results.push({ name, ok: true }); }
+    catch (error) { results.push({ name, ok: false, error: error.message }); }
+  }
+  const at = (x, y) => y * 15 + x;
+  const empty = () => Array(225).fill(0);
+  test('新棋局为空，黑子先手', () => {
+    const s = e.createState();
+    assert(s.board.length === 225 && s.board.every(v => v === 0));
+    assert(s.turn === 'human' && s.winner === null);
+  });
+  for (const [name, dx, dy, x, y] of [['横线',1,0,2,4],['竖线',0,1,8,2],['正斜线',1,1,4,4],['反斜线',1,-1,3,10]]) {
+    test(`${name}五子连成可判胜`, () => {
+      const b = empty();
+      for(let i=0;i<5;i++) b[at(x+i*dx,y+i*dy)] = 1;
+      assert(e.winnerAt(b,at(x,y),1));
+      assert(e.checkWinner(b) === 'human');
+    });
+  }
+  test('换行不会被误判为连线', () => {
+    const b = empty();
+    [13,14,15,16,17].forEach(i => b[i] = 1);
+    assert(e.checkWinner(b) === null);
+  });
+  test('黑白轮换并拒绝占用交点', () => {
+    const start = e.createState();
+    const after = e.play(start, 112);
+    assert(after.board[112] === 1 && after.turn === 'witch');
+    assert(start.board[112] === 0, '不应修改输入状态');
+    assert(e.play(after,112) === null);
+    assert(e.play(after,113).board[113] === 2);
+  });
+  test('AI 先完成自己的胜局，再考虑防守', () => {
+    const b = empty();
+    for(let x=2;x<6;x++) { b[at(x,5)]=2; b[at(x,8)]=1; }
+    const choice = e.chooseMove(b,2);
+    assert([at(1,5),at(6,5)].includes(choice));
+    assert(b[choice] === 0, 'AI 不得修改原始棋盘');
+  });
+  test('AI 阻挡对方唯一立即获胜的位置', () => {
+    const b = empty();
+    b[at(1,7)] = 2;
+    for(let x=2;x<6;x++) b[at(x,7)] = 1;
+    assert(e.chooseMove(b,2) === at(6,7));
+  });
+  test('AI 识别中间缺一子的威胁', () => {
+    const b = empty();
+    [3,4,6,7].forEach(x => b[at(x,7)] = 1);
+    assert(e.chooseMove(b,2) === at(5,7));
+  });
+  test('AI 开局选中心，结束后不再落子', () => {
+    assert(e.chooseMove(empty(),2) === 112);
+    const b = empty();
+    for(let x=0;x<5;x++) b[x]=1;
+    assert(e.chooseMove(b,2) === null);
+  });
+  test('存档保留白棋待落状态，可被恢复继续', () => {
+    const s = e.play(e.createState(),112);
+    const r = e.restoreState(JSON.parse(JSON.stringify(s)));
+    assert(r.turn === 'witch' && r.board[112] === 1 && r.history.length === 1);
+    const next = e.play(r,e.chooseMove(r.board));
+    assert(next.turn === 'human' && next.board.filter(Boolean).length === 2);
+  });
+  test('从棋子数修正不一致的存档回合', () => {
+    const s=e.play(e.createState(),112); s.turn='human'; s.winner='witch';
+    const r=e.restoreState(s);
+    assert(r.turn==='witch' && r.winner===null);
+  });
+  test('损坏数组、非法棋子及非法步数会安全重置', () => {
+    const short=e.createState();short.board.pop();
+    const strange=e.createState();strange.board[0]=9;
+    const count=e.createState();count.board[0]=2;
+    for(const save of [short,strange,count]) {
+      const result=e.validateSave(save);
+      assert(!result.valid && result.state.board.every(v=>v===0));
+    }
+  });
+  test('无历史的有效旧存档可以继续，不伪造悔棋历史', () => {
+    const s=e.play(e.play(e.createState(),112),113);delete s.history;
+    const r=e.restoreState(s);
+    assert(r.board[112]===1 && r.board[113]===2 && !e.canUndo(r));
+    const moved=e.play(e.play(r,127),128);
+    assert(e.undo(moved).board.filter(Boolean).length===2);
+  });
+  test('悔棋能撤回待落白子的黑子，也能撤回完整一回合', () => {
+    const human=e.play(e.createState(),112);
+    assert(e.undo(human).board.every(v=>v===0));
+    const pair=e.play(human,113);
+    const undone=e.undo(pair);
+    assert(undone.board.every(v=>v===0) && undone.turn==='human');
+  });
+  test('胜局只允许重新开局，不接受后续落子和悔棋', () => {
+    let s=e.createState();
+    for(const i of [105,0,106,2,107,4,108,6,109]) s=e.play(s,i);
+    assert(s.winner==='human' && e.play(s,8)===null && e.undo(s)===null);
+    const loaded=e.validateSave(s);
+    assert(loaded.valid && loaded.state.winner==='human');
+  });
+  test('满盘无五连时判和棋并可保存恢复', () => {
+    const s=e.createState();
+    for(let y=0;y<15;y++)for(let x=0;x<15;x++)s.board[at(x,y)]=(x+2*y)%4<2?1:2;
+    assert(e.checkWinner(s.board)==='draw');
+    const missing=s.board.lastIndexOf(1);
+    s.board[missing]=0;s.turn='human';
+    const finished=e.play(s,missing);
+    assert(finished.winner==='draw' && e.chooseMove(finished.board)===null);
+    assert(e.validateSave(finished).valid && e.restoreState(finished).winner==='draw');
+  });
+  test('伪造或重复的历史被丢弃，棋盘仍可恢复', () => {
+    const s=e.play(e.play(e.createState(),112),113);
+    s.history=[{index:112,player:1},{index:112,player:2}];
+    const r=e.restoreState(s);
+    assert(r.history.length===0 && r.board[112]===1 && r.board[113]===2);
+  });
+  globalThis.gomokuTestResults=results;
+})();
+</script>
+<script>
+(async function () {
+  const results=globalThis.gomokuTestResults;
+  const e=WitchGomoku.engine;
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const fixture=document.getElementById('test-fixture');
+  const assert=(condition,message)=>{if(!condition)throw new Error(message||'断言失败');};
+  async function test(name,run){try{await run();results.push({name,ok:true});}catch(error){results.push({name,ok:false,error:error.message});fixture.replaceChildren();}}
+  await test('点击先预选，再确认落子；销毁后无残留 AI 落子',async()=>{
+    let changes=0;
+    const game=WitchGomoku.mount(fixture,{onChange(){changes++;}});
+    const point=fixture.querySelector('[data-index="112"]');
+    point.click();assert(game.getState().board[112]===0);
+    point.click();assert(game.getState().board[112]===1 && changes===1);
+    const pending=game.getState();
+    game.destroy();await wait(750);
+    assert(changes===1 && game.getState().board.filter(Boolean).length===1);
+    const resumed=WitchGomoku.mount(fixture,{saved:pending});
+    await wait(800);
+    assert(resumed.getState().board.filter(Boolean).length===2);
+    resumed.destroy();
+  });
+  await test('重新开局须明确确认，取消会保留当前棋盘',async()=>{
+    const game=WitchGomoku.mount(fixture,{saved:e.play(e.play(e.createState(),112),113)});
+    fixture.querySelector('[data-action="restart"]').click();
+    assert(game.getState().board.filter(Boolean).length===2);
+    assert(!fixture.querySelector('.wg-restart').hidden);
+    fixture.querySelector('[data-action="cancel-restart"]').click();
+    assert(game.getState().board.filter(Boolean).length===2);
+    fixture.querySelector('[data-action="restart"]').click();
+    fixture.querySelector('[data-action="confirm-restart"]').click();
+    assert(game.getState().board.every(v=>v===0));
+    game.destroy();
+  });
+  await test('收好棋盘会取消白棋计时并交出可继续的存档',async()=>{
+    let saved;
+    const game=WitchGomoku.mount(fixture,{saved:e.play(e.createState(),112),onExit(s){saved=s;}});
+    fixture.querySelector('[data-action="exit"]').click();
+    await wait(800);
+    assert(saved.turn==='witch' && saved.board.filter(Boolean).length===1);
+    assert(game.getState().board.filter(Boolean).length===1);
+    game.destroy();
+  });
+  await test('胜利只通知一次，结束和重开存档不会重复触发',async()=>{
+    let state=e.createState();
+    for(const i of [105,0,106,2,107,4,108,6])state=e.play(state,i);
+    let finishes=0;
+    const game=WitchGomoku.mount(fixture,{saved:state,onFinish(winner){assert(winner==='human');finishes++;}});
+    fixture.querySelector('[data-index="109"]').click();
+    fixture.querySelector('[data-action="place"]').click();
+    assert(finishes===1 && game.getState().winner==='human');
+    const finished=game.getState();
+    fixture.querySelector('[data-index="8"]').click();await wait(800);
+    assert(finishes===1 && game.getState().board.filter(Boolean).length===9);
+    game.destroy();
+    const resumed=WitchGomoku.mount(fixture,{saved:finished,onFinish(){finishes++;}});
+    await wait(100);
+    assert(finishes===1);resumed.destroy();
+  });
+  const list=document.getElementById('results');
+  for(const result of results){const item=document.createElement('li');item.className=result.ok?'pass':'fail';item.textContent=(result.ok?'✓ ':'✗ ')+result.name+(result.error?'：'+result.error:'');list.appendChild(item);}
+  const failed=results.filter(result=>!result.ok).length;
+  document.getElementById('summary').textContent=`${results.length-failed} / ${results.length} 项通过。`;
+  document.documentElement.dataset.testResult=failed?'fail':'pass';
+  if(!failed)WitchGomoku.mount(fixture,{onExit(){fixture.replaceChildren();}});
+})();
+</script>
+</html>

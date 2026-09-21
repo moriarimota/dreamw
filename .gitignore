@@ -1,0 +1,10 @@
+user-data/
+releases/
+archive/
+desktop/smoke-fixture-*/
+*.log
+*.tmp
+*.bak
+design/references/
+tests/test-data/
+.DS_Store

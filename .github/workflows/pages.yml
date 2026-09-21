@@ -1,0 +1,32 @@
+name: Publish game to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Stage only the playable game
+        run: |
+          mkdir -p public/assets
+          cp game/index.html game/style.css game/navigation.js game/life.js game/storage.js game/gomoku.js game/app.js game/sw.js game/icon.svg game/manifest.webmanifest game/.nojekyll public/
+          cp game/assets/cottage-empty-v1.png game/assets/witch-walk-v1.png game/assets/dream-props-v1.png public/assets/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

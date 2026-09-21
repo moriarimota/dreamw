@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>那边的小日子 · UI 集成验证</title>
+<style>
+body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#354739;font:15px/1.65 system-ui}h1{font-size:24px}.note{font-size:13px;color:#716d58}.pass{color:#32613b}.fail{color:#a43e31}li{margin:7px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}iframe{display:block;border:1px solid #baa989;border-radius:16px;width:390px;max-width:100%;height:780px;margin:22px auto}#summary{font-weight:700}
+</style>
+<h1>UI 集成验证</h1>
+<p class="note">仅允许运行于测试源 http://127.0.0.1:18766。测试使用模拟梦种；结束时卸载游戏并还原此测试源的原存档。不会访问 18765，也不会读取或写入 D 盘个人存档。</p>
+<p id="summary" role="status">准备验证…</p>
+<ol id="results"></ol>
+<div id="fixture"></div>
+<script src="../game/life.js"></script>
+<script>
+(async function () {
+  'use strict';
+  const KEY='witchlife-world-v2';
+  const summary=document.getElementById('summary');
+  const resultsEl=document.getElementById('results');
+  const fixture=document.getElementById('fixture');
+  const results=[];
+  const errors=[];
+  let frame=null;
+  let originalRaw=null;
+  let backedUp=false;
+  let restored=false;
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  function assert(condition,message){if(!condition)throw new Error(message||'断言失败');}
+  function record(name,ok,error){
+    results.push({name,ok,error:error?String(error):null});
+    const item=document.createElement('li');
+    item.className=ok?'pass':'fail';
+    item.textContent=(ok?'✓ ':'✗ ')+name;
+    if(error){const detail=document.createElement('pre');detail.textContent=String(error);item.append(detail);}
+    resultsEl.append(item);
+    console[ok?'log':'error']((ok?'PASS ':'FAIL ')+name,error||'');
+  }
+  async function test(name,run){summary.textContent='正在验证：'+name;await run();record(name,true);}
+  async function until(check,message,timeout=12000){
+    const deadline=performance.now()+timeout;
+    while(performance.now()<deadline){
+      const result=check();
+      if(result)return result;
+      await wait(35);
+    }
+    throw new Error(message+'（等待超时）');
+  }
+  function doc(){return frame.contentDocument;}
+  function saved(){const value=localStorage.getItem(KEY);assert(value,'游戏未写出存档');return JSON.parse(value);}
+  function byText(text,scope=doc().getElementById('sheet-content')){
+    const item=[...scope.querySelectorAll('button')].find(button=>button.textContent.trim()===text);
+    assert(item,'找不到按钮：'+text);return item;
+  }
+  function restoreStorage(){
+    if(!backedUp||restored)return;
+    if(originalRaw===null)localStorage.removeItem(KEY);else localStorage.setItem(KEY,originalRaw);
+    restored=true;
+  }
+  function onLeave(){
+    if(frame){frame.remove();frame=null;}
+    restoreStorage();
+  }
+  window.addEventListener('pagehide',onLeave);
+  async function unload(){
+    if(!frame)return;
+    const old=frame;
+    await new Promise(resolve=>{old.addEventListener('load',resolve,{once:true});old.src='about:blank';setTimeout(resolve,1500);});
+    old.remove();frame=null;
+    await wait(80);
+  }
+  async function launch(state){
+    await unload();
+    if(state)localStorage.setItem(KEY,JSON.stringify(state));
+    frame=document.createElement('iframe');
+    frame.title='隔离测试中的游戏';
+    frame.src='../game/index.html?ui-smoke='+Date.now();
+    const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));
+    fixture.append(frame);
+    await loaded;
+    const child=frame.contentWindow;
+    child.addEventListener('error',event=>errors.push(event.message||'child error'));
+    child.addEventListener('unhandledrejection',event=>errors.push(String(event.reason)));
+    const originalError=child.console.error.bind(child.console);
+    child.console.error=(...args)=>{errors.push(args.map(String).join(' '));originalError(...args);};
+    await until(()=>{
+      const loading=doc().getElementById('loading');
+      if(loading&&!loading.hidden&&loading.textContent.includes('暂时没能打开'))throw new Error(loading.textContent);
+      return loading&&loading.hidden&&!doc().getElementById('seed').disabled;
+    },'游戏未完成启动',20000);
+  }
+  try{
+    assert(location.hostname==='127.0.0.1'&&location.port==='18766','为了保护个人存档，这个测试只允许在 http://127.0.0.1:18766/tests/ui-smoke.html 运行。');
+    originalRaw=localStorage.getItem(KEY);backedUp=true;
+    const initial=WitchLife.create(Date.now());
+    initial.preferences.name='测试中的小罗';
+    await test('启动实际游戏页面并保存初始生活状态',async()=>{
+      await launch(initial);
+      assert(saved().version===2,'世界版本不正确');
+      assert(doc().getElementById('world'),'缺少游戏画布');
+      assert(!doc().getElementById('witch-hit').disabled,'角色交互尚未启用');
+    });
+    let fragmentId;
+    const fragmentText='今天吃了桂花酒酿，窗外下着雨。<img src=x onerror="window.__uiSmokeXss=1">';
+    await test('生活碎片通过真实表单进入提案，输入被当作文字',async()=>{
+      doc().getElementById('seed').click();
+      const input=doc().getElementById('fragment-input');assert(input,'缺少生活碎片输入框');
+      input.value=fragmentText;input.dispatchEvent(new frame.contentWindow.Event('input',{bubbles:true}));
+      byText('把梦种交给她').click();
+      await until(()=>saved().fragments.length===1,'梦种未保存');
+      const fragment=saved().fragments[0];fragmentId=fragment.id;
+      assert(fragment.text===fragmentText,'原始碎片未完整保留');
+      assert(fragment.status==='pending','提案不应擅自开始制作');
+      assert(doc().getElementById('sheet-content').textContent.includes('<img'),'用户文字没有按纯文本显示');
+      assert(!doc().getElementById('sheet-content').querySelector('img'),'输入被错误解析成 HTML');
+      assert(!frame.contentWindow.__uiSmokeXss,'用户文字执行成了脚本');
+    });
+    await test('接受提案后开始研究，并能读到对应书页',async()=>{
+      byText('现在一起试试看').click();
+      await until(()=>saved().activity.studyFragmentId===fragmentId,'研究活动未开始');
+      assert(saved().fragments[0].status==='studying','梦种阶段不是研究中');
+      doc().getElementById('together').click();
+      const excerpt=doc().querySelector('.book-excerpt');
+      assert(excerpt&&excerpt.textContent.includes('附页'),'共同阅读没有显示对应的研究书页');
+    });
+    await test('五子棋选点后确认；关闭棋盘保留棋局并继续研究',async()=>{
+      byText('来一盘五子棋').click();
+      const point=await until(()=>doc().querySelector('.wg-cell[data-index="112"]'),'棋盘未挂载');
+      point.click();
+      assert(!saved().board||saved().board.board[112]===0,'第一次选点不应立即落子');
+      doc().querySelector('[data-action="place"]').click();
+      assert(saved().board.board[112]===1,'确认后未保存黑子');
+      doc().getElementById('close-sheet').click();
+      const after=saved();
+      assert(after.activity.kind!=='game','关掉棋盘后仍在下棋活动');
+      assert(after.activity.studyFragmentId===fragmentId,'关掉棋盘没有接回刚才的研究');
+      await wait(850);
+      assert(saved().board.board.filter(Boolean).length===1,'销毁棋盘后白棋计时仍在运行');
+    });
+    await test('重新打开棋盘会继续待落白棋，收好后仍能继续日常',async()=>{
+      doc().getElementById('together').click();byText('来一盘五子棋').click();
+      await until(()=>saved().board.board.filter(Boolean).length===2,'白棋没有恢复落子',5000);
+      doc().querySelector('[data-action="exit"]').click();
+      assert(doc().getElementById('sheet').hidden,'收好棋盘后面板没有关闭');
+      assert(saved().activity.studyFragmentId===fragmentId,'续盘后研究活动丢失');
+    });
+    await test('导入文件先显示确认预览，不直接替换当前世界',async()=>{
+      doc().getElementById('settings').click();
+      const fileInput=doc().querySelector('input[type="file"]');assert(fileInput,'缺少导入文件入口');
+      const other=WitchLife.create(Date.now());other.preferences.name='未确认导入的世界';
+      const transfer=new frame.contentWindow.DataTransfer();
+      transfer.items.add(new frame.contentWindow.File([JSON.stringify(other)],'ui-fixture.json',{type:'application/json'}));
+      fileInput.files=transfer.files;fileInput.dispatchEvent(new frame.contentWindow.Event('change',{bubbles:true}));
+      await until(()=>[...doc().querySelectorAll('#sheet-content button')].some(b=>b.textContent==='确认导入这份存档'),'没有出现导入确认预览');
+      assert(saved().fragments.some(f=>f.id===fragmentId),'预览阶段已覆盖现有梦种');
+      assert(saved().preferences.name==='测试中的小罗','预览阶段已替换角色');
+      doc().getElementById('close-sheet').click();
+    });
+    await test('离线研究和制作能追赶时间，并显示可点击的真实物件',async()=>{
+      const past=Date.now()-3*60000;
+      const offline=WitchLife.create(past);
+      const fragment=WitchLife.addFragment(offline,'测试：梦见桂花在雨里发光。',past);
+      WitchLife.acceptFragment(offline,fragment.id,past,{immediate:true});
+      assert(offline.creations.length===0,'离线准备状态不应预先制作完成');
+      await launch(offline);
+      const restoredState=saved();
+      assert(restoredState.creations.length===1,'打开时未完成离线制作');
+      assert(restoredState.fragments[0].status==='made','完成后梦种状态错误');
+      const hit=doc().querySelector('#object-hits button');
+      assert(hit&&hit.getAttribute('aria-label').includes(restoredState.creations[0].name),'成品缺少可访问的点击入口');
+      hit.click();
+      assert(doc().getElementById('sheet-title').textContent===restoredState.creations[0].name,'成品详情没有打开');
+      assert(doc().getElementById('sheet-content').textContent.includes('测试：梦见桂花'),'物件详情未保留来源');
+      doc().getElementById('close-sheet').click();
+    });
+    await test('测试期间没有捕获到运行错误',async()=>{assert(!errors.length,errors.join('\n'));});
+  }catch(error){record('UI 集成流程',false,error.stack||error.message||error);}
+  finally{
+    await unload();
+    try{restoreStorage();if(backedUp){assert(localStorage.getItem(KEY)===originalRaw,'测试源的原存档未恢复');record('测试源原存档已恢复，游戏 iframe 已卸载',true);}}
+    catch(error){record('测试存档恢复',false,error.stack||error);}
+    window.removeEventListener('pagehide',onLeave);
+    const failed=results.filter(r=>!r.ok).length;
+    summary.textContent=`${results.length-failed} / ${results.length} 项通过。${restored?'测试存档已恢复。':''}`;
+    document.documentElement.dataset.testResult=failed?'fail':'pass';
+    window.uiSmokeResults={results,errors,restored};
+  }
+})();
+</script>
+</html>
