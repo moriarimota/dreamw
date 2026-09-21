@@ -6,6 +6,10 @@
 
 ## 开始玩
 
+手机/网页入口：[那边的小日子](https://moriarimota.github.io/dreamw/)。在iPhone上用Safari打开，可通过分享菜单添加到主屏幕。电脑关机仍可访问；跨设备进度通过导出、导入存档转移。
+
+源代码与文档：[moriarimota/dreamw](https://github.com/moriarimota/dreamw)。
+
 双击根目录 `启动那边的小日子.exe`。无需安装Python、Node或游戏引擎。启动器使用Windows现有的Edge/Chrome打开独立游戏窗口；托盘菜单可重新打开或退出。若没有可用的独立窗口浏览器，会提示回退行为。
 
 1. “一起待会儿”能读她正在读的书、邀请喝茶、开一盘五子棋。
@@ -57,3 +61,5 @@ ChatGPT会员与API独立计费：[官方说明](https://help.openai.com/en/arti
 ## 开发
 
 世界规则独立于渲染；引入新行为时先写前提、影响和记忆，再做画面。详见 [开发流程](docs/development/01-workflow.md) 与 [AGENTS.md](AGENTS.md)。没有npm构建步骤，Node仅用于开发检查。Windows启动器用系统.NET Framework C#编译器构建。
+
+从GitHub下载的源码不含编译后的EXE。源码使用者可按 desktop/README.md 构建；本机D盘与便携包已经带有启动程序。
