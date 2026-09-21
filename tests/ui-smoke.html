@@ -11,7 +11,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
 <p id="summary" role="status">准备验证…</p>
 <ol id="results"></ol>
 <div id="fixture"></div>
-<script src="../game/life.js"></script>
+<script src="../game/games.js?v=0.3.0"></script><script src="../game/life.js?v=0.3.0"></script>
 <script>
 (async function () {
   'use strict';
@@ -96,7 +96,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
     initial.preferences.name='测试中的小罗';
     await test('启动实际游戏页面并保存初始生活状态',async()=>{
       await launch(initial);
-      assert(saved().version===2,'世界版本不正确');
+      assert(saved().version===3,'世界版本不正确');
       assert(doc().getElementById('world'),'缺少游戏画布');
       assert(!doc().getElementById('witch-hit').disabled,'角色交互尚未启用');
     });
@@ -124,7 +124,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
       assert(excerpt&&excerpt.textContent.includes('附页'),'共同阅读没有显示对应的研究书页');
     });
     await test('五子棋选点后确认；关闭棋盘保留棋局并继续研究',async()=>{
-      byText('来一盘五子棋').click();
+      byText('玩会儿游戏').click();byText('五子棋轮流落子，和小罗下一盘。').click();
       const point=await until(()=>doc().querySelector('.wg-cell[data-index="112"]'),'棋盘未挂载');
       point.click();
       assert(!saved().board||saved().board.board[112]===0,'第一次选点不应立即落子');
@@ -138,7 +138,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
       assert(saved().board.board.filter(Boolean).length===1,'销毁棋盘后白棋计时仍在运行');
     });
     await test('重新打开棋盘会继续待落白棋，收好后仍能继续日常',async()=>{
-      doc().getElementById('together').click();byText('来一盘五子棋').click();
+      doc().getElementById('together').click();byText('玩会儿游戏').click();byText('五子棋轮流落子，和小罗下一盘。').click();
       await until(()=>saved().board.board.filter(Boolean).length===2,'白棋没有恢复落子',5000);
       doc().querySelector('[data-action="exit"]').click();
       assert(doc().getElementById('sheet').hidden,'收好棋盘后面板没有关闭');

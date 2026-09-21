@@ -20,3 +20,11 @@
 导入必须检查：版本、长度、枚举、有限数值、引用关系、重复产物、活动前提与棋局合法性。个人梦种内容使用 textContent 渲染，不能作为代码执行。网页发布包不包含 user-data。
 
 Demo上限：240颗梦种、120件物品、近期80条精选记忆、160条因果事件；长期大世界需进一步设计归档与数据库迁移，不能声称无限记忆。当前先确保已有物件与原文不会因普通离线而丢失。
+
+## v3 迁移（2026-09-21）
+
+外层 `version` 从2升至3；存储键仍为 `witchlife-world-v2`，不能换键导致旧档失联。校验器接收v2/v3，旧档保留梦种、书签、事件、种植、五子棋，再补 `home`、`playbox` 与 `preferences.utcOffsetMinutes`。浏览器首次迁移保存 `witchlife-world-v2-before-v3`，后续不覆盖此备份；桌面保存仍保留上一份磁盘文件。
+
+`home`：pantry.herbs/berries/snacks（0–24），comfort（0–100），lamp，displayMode，birdWater（0–3），birdVisits，counts。`playbox`：sudoku/puzzle/pairs，每类最多一局，含稳定局号与celebrated标记。数独导入验证唯一解和给定不可改；拼片检查完整排列；翻牌检查每个图案两张和配对一致。
+
+活动扩充 `material`（herbs/berries），place 可为 gardenPath/gardenBench。开始时取用的材料已经反映在home中，恢复暂停活动不再调用start；来源、决策和计时继续沿用现有字段。对话、输入仍使用textContent。

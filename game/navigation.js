@@ -3,6 +3,7 @@
   const W=941,H=1672,STEP=18;
   // Foot positions, inset from furniture: the sprite itself is taller than its footprint.
   const FLOOR=[[390,550],[640,550],[685,615],[685,840],[720,930],[700,1060],[580,1090],[330,1080],[270,1030],[270,950],[295,900],[280,790],[340,740],[340,660],[380,630]];
+  function makeMap(FLOOR){
   function inside(x,y){let c=false;for(let i=0,j=FLOOR.length-1;i<FLOOR.length;j=i++){const a=FLOOR[i],b=FLOOR[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))c=!c;}return c;}
   const cells=[],byKey=new Map();
   for(let y=0;y<H;y+=STEP)for(let x=0;x<W;x+=STEP){if(inside(x,y)){const p={x,y,key:x+','+y};cells.push(p);byKey.set(p.key,p);}}
@@ -16,5 +17,7 @@
       for(const[dx,dy]of[[STEP,0],[-STEP,0],[0,STEP],[0,-STEP],[STEP,STEP],[STEP,-STEP],[-STEP,STEP],[-STEP,-STEP]]){const q=byKey.get((p.x+dx)+','+(p.y+dy));if(!q||closed.has(q.key)||!clear(p,q))continue;const score=g.get(p.key)+Math.hypot(dx,dy);if(score<(g.get(q.key)??Infinity)){prev.set(q.key,p);g.set(q.key,score);if(!open.includes(q))open.push(q);}}
     }return[];
   }
-  root.WitchNavigation={W,H,FLOOR,cells,inside,nearest,clear,findPath};
+  return {W,H,FLOOR,cells,inside,nearest,clear,findPath};
+  }
+  root.WitchNavigation={...makeMap(FLOOR),makeMap};
 })(globalThis);

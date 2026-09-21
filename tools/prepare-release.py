@@ -3,13 +3,13 @@ from pathlib import Path
 import json, sys, zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-GAME = ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
-ASSETS = ['cottage-empty-v1.png','witch-walk-v1.png','dream-props-v1.png']
+GAME = ['games.js', 'games-ui.js', 'games.css', 'scenes.js', 'scenes.css'] + ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
+ASSETS = ['courtyard-v1.png','cottage-empty-v1.png','witch-walk-v1.png','dream-props-v1.png']
 TEXT = ['README.md','AGENTS.md','.gitignore','启动说明.md','.github/workflows/pages.yml']
 TEXT += ['game/'+f for f in GAME]
 TEXT += ['desktop/'+f for f in ['Launcher.cs','build.ps1','smoke.ps1','README.md']]
 TEXT += ['tools/'+f for f in ['package.ps1','prepare-release.py']]
-TEXT += ['tests/'+f for f in ['life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
+TEXT += ['tests/'+f for f in ['expansion-tests.js','expansion-ui.html','life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
 TEXT += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'docs').rglob('*.md'))]
 
 def safe(relative):

@@ -72,7 +72,7 @@ function finishCallback() {
   await test('首次打开网页可创建世界，读取本身不写存档', async () => {
     const h = harness();
     const state = await h.storage.load();
-    assert.equal(state.version, 2);
+    assert.equal(state.version, 3);
     assert.equal(h.writes.length, 0);
     assert.equal(h.requests.length, 0);
   });
@@ -138,7 +138,7 @@ function finishCallback() {
   await test('明确的桌面 404 可以创建第一份存档', async () => {
     const h = harness({ desktop: true, diskStatus: 404 });
     const state = await h.storage.load();
-    assert.equal(state.version, 2);
+    assert.equal(state.version, 3);
     await h.storage.save(state);
     assert.equal(h.requests.filter(r => r.method === 'PUT').length, 1);
   });

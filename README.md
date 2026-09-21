@@ -63,3 +63,9 @@ ChatGPT会员与API独立计费：[官方说明](https://help.openai.com/en/arti
 世界规则独立于渲染；引入新行为时先写前提、影响和记忆，再做画面。详见 [开发流程](docs/development/01-workflow.md) 与 [AGENTS.md](AGENTS.md)。没有npm构建步骤，Node仅用于开发检查。Windows启动器用系统.NET Framework C#编译器构建。
 
 从GitHub下载的源码不含编译后的EXE。源码使用者可按 desktop/README.md 构建；本机D盘与便携包已经带有启动程序。
+
+## v0.3的新入口
+
+“一起待会儿→玩会儿游戏”：五子棋、数独、照片交换拼图、星月记忆牌。“小院”或场景小金点：采集、做茶点、野餐、看鸟、观星。页首时钟跟随设备，天气为游戏天气。详细规则在 docs/design/04-courtyard-and-games.md。
+
+新增模块：game/games.js（纯小游戏规则）、games-ui.js（界面）、scenes.js（场景与天气绘制），对应 games.css/scenes.css。小游戏、摆放与材料随存档保存，旧v2存档自动迁移。

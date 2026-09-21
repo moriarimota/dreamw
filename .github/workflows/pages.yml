@@ -22,8 +22,8 @@ jobs:
       - name: Stage only the playable game
         run: |
           mkdir -p public/assets
-          cp game/index.html game/style.css game/navigation.js game/life.js game/storage.js game/gomoku.js game/app.js game/sw.js game/icon.svg game/manifest.webmanifest game/.nojekyll public/
-          cp game/assets/cottage-empty-v1.png game/assets/witch-walk-v1.png game/assets/dream-props-v1.png public/assets/
+          cp game/games.js game/games-ui.js game/games.css game/scenes.js game/scenes.css game/index.html game/style.css game/navigation.js game/life.js game/storage.js game/gomoku.js game/app.js game/sw.js game/icon.svg game/manifest.webmanifest game/.nojekyll public/
+          cp game/assets/courtyard-v1.png game/assets/cottage-empty-v1.png game/assets/witch-walk-v1.png game/assets/dream-props-v1.png public/assets/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
