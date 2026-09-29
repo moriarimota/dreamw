@@ -8,7 +8,8 @@
 - 实际浏览器隔离测试源18766：arcade-ui 8/8（320像素手机宽度），expansion-ui 10/10，ui-smoke 9/9。测试存档还原，不操作真实18765存档。
 - 实际查看320×568连连看第36关，发现平台表情字体缺字，改为12种内置SVG小图标；增大格子并准确绘制折线，提示会滚动到相应图案。
 - 未新增外部服务或AI调用。未重跑未修改的桌面C#与五子棋独立核心测试；对应旧版本记录在下面。iPhone真机与Safari主屏幕缓存仍待设备试玩。
-- 发布回执与最终包检查将追加在本节之后，不能仅凭本地通过声称网页已更新。
+- GitHub Pages 发布成功：提交 `0cce5864d97c7f197cb0d1fadccc40c8c3fbc550`，运行 [36534931270](https://github.com/moriarimota/dreamw/actions/runs/36534931270)，结论 success。已实际打开正式网址，确认页脚v0.4、六游戏入口、36关关卡册、六项兴趣手册与成品入口，控制台无错误。
+- 三种发布包CRC、依赖引用和私有文件排除检查通过：网页25文件、源码60文件、Windows便携46文件。路径 `D:/WitchLife/releases/WitchLife-demo-v4.0-{web,source,portable}.zip`。完整文件SHA256在本机 `releases/v4-package-verification.json`；便携包SHA256为 `eba9b674bd71999319a09aff4ee4c6381bc14a4214cc8bb0c1eecd87fbfbc805`。这些包包含发布时的文档快照，本回执随后补记。
 
 | 检查 | 结果 | 范围 |
 | --- | --- | --- |
