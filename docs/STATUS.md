@@ -4,7 +4,7 @@
 
 ## 试玩入口
 
-[手机与网页](https://moriarimota.github.io/dreamw/) · [代码与设计库](https://github.com/moriarimota/dreamw)。同一网址持续更新；D盘入口为根目录的“启动那边的小日子.exe”。本地v0.5已实现，网页发布回执见 development/02-verification.md。
+[手机与网页](https://moriarimota.github.io/dreamw/) · [代码与设计库](https://github.com/moriarimota/dreamw)。同一网址持续更新；D盘入口为根目录的“启动那边的小日子.exe”。D盘与网页均已更新v0.5，网页发布回执见 development/02-verification.md。
 
 ## 本轮增加
 
