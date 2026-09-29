@@ -56,6 +56,11 @@ function Add-PackageFile {
 $requiredRuntimeFiles = @(
     '启动那边的小日子.exe',
     'game/index.html',
+    'game/tokens.js',
+    'game/arcade.js',
+    'game/arcade-ui.js',
+    'game/arcade.css',
+    'game/hobbies.js',
     'game/games.js',
     'game/games-ui.js',
     'game/games.css',

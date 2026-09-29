@@ -14,6 +14,7 @@
 | 本轮具体测过什么 | [development/02-verification.md](development/02-verification.md) |
 | 手机与GitHub发布 | [development/03-github-pages.md](development/03-github-pages.md) |
 | 小院、小游戏与天气现行规则 | [design/04-courtyard-and-games.md](design/04-courtyard-and-games.md) |
+| 兴趣计划、连连看、消消乐和朋友独立世界 | [design/05-hobbies-and-arcade.md](design/05-hobbies-and-arcade.md) |
 | 下一批扩充内容 | [design/03-next-version.md](design/03-next-version.md) |
 | 每次改变了什么 | [CHANGELOG.md](CHANGELOG.md) |
 | 原画、美术提案、生成记录 | `../design/`；其中早期功能设想以本知识库为准 |

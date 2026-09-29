@@ -11,7 +11,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
 <p id="summary" role="status">准备验证…</p>
 <ol id="results"></ol>
 <div id="fixture"></div>
-<script src="../game/games.js?v=0.3.0"></script><script src="../game/life.js?v=0.3.0"></script>
+<script src="../game/arcade.js?v=0.4.0"></script><script src="../game/hobbies.js?v=0.4.0"></script><script src="../game/games.js?v=0.4.0"></script><script src="../game/life.js?v=0.4.0"></script>
 <script>
 (async function () {
   'use strict';
@@ -96,7 +96,7 @@ body{max-width:850px;margin:24px auto;padding:0 18px;background:#f7f0df;color:#3
     initial.preferences.name='测试中的小罗';
     await test('启动实际游戏页面并保存初始生活状态',async()=>{
       await launch(initial);
-      assert(saved().version===3,'世界版本不正确');
+      assert(saved().version===4,'世界版本不正确');
       assert(doc().getElementById('world'),'缺少游戏画布');
       assert(!doc().getElementById('witch-hit').disabled,'角色交互尚未启用');
     });

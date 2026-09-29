@@ -5,6 +5,7 @@
   root.WitchLife = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (G) {
   'use strict';
+  const H=globalThis.WitchHobbies||(typeof require==='function'?require('./hobbies.js'):null), A=globalThis.WitchArcade||(typeof require==='function'?require('./arcade.js'):null);
   const MINUTE = 60000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
   const LIMITS = Object.freeze({ text: 600, fragments: 240, creations: 120, memories: 80, fileBytes: 1500000 });
   const BOOKS = [
@@ -48,8 +49,10 @@
     picnic: { title: '把茶点带到小院吃', place: 'gardenBench', detail: '在长椅上铺一方小布，给你留出半边位置。', durations: [15, 25] },
     craft: { title: '把生活碎片做成小东西', place: 'desk', detail: '她把材料排在桌上，试着让你的日常在这里留下形状。', durations: [0.75] }
   };
+  for(const k of H.ids){const d=H.PROJECTS[k];ACTIVITIES[k]={title:d.name,detail:d.steps[0][2],place:d.steps[0][1],durations:[25,40,20]};}
   const WEATHER = ['晴朗', '薄云', '小雨', '雨后'];
   const ENERGY_RATE = { read: -3, research: -9, craft: -10, tea: 12, rest: 24, break: 6, game: -4, cook:-6, tidy:-10, gather:-12, birdwatch:8, stargaze:4, picnic:15 };
+  for(const k of H.ids)ENERGY_RATE[k]=-7;
   function hourAt(s, at) { return Math.floor(((at + (s.preferences.utcOffsetMinutes === undefined ? 480 : s.preferences.utcOffsetMinutes) * MINUTE) % DAY + DAY) % DAY / HOUR); }
   function weatherAt(s, at) { return WEATHER[hash(String(s.createdAt) + ':' + Math.floor(at / (6 * HOUR))) % WEATHER.length]; }
   function updateWorld(s, at) {
@@ -77,9 +80,9 @@
     const known = seed && s.knowledge.some(k => k.key === 'seed:' + seed.id);
     const plantReady = seed && seed.proposal.kind === 'plant' && known;
     const rows = [
-      { kind: 'read', score: 25 + p.bookish * 28 + (weather === '小雨' ? 14 : 0), eligible: true, reasons: ['她喜欢把一本书慢慢读完', ...(weather === '小雨' ? ['窗外在下雨，读书很合适'] : [])] },
+      { kind: 'read', score: 20 + p.bookish * 20 + (weather === '小雨' ? 14 : 0), eligible: true, reasons: ['她喜欢把一本书慢慢读完', ...(weather === '小雨' ? ['窗外在下雨，读书很合适'] : [])] },
       { kind: 'tea', score: 17 + (energy < 55 ? 18 : 0) + (weather === '小雨' ? 10 : 0), eligible: true, reasons: [energy < 55 ? '有些疲倦，热茶能让她缓一缓' : '她想在活动之间留一点喝茶的时间'] },
-      { kind: 'research', score: 18 + p.curiosity * 30 + (seed && !known ? 50 : 0), eligible: energy >= 18, reasons: [seed && !known ? '你留下的梦种还没有弄明白，需要先查资料' : '梦种的叶片还有一个没弄明白的小变化'] },
+      { kind: 'research', score: 18 + p.curiosity * 30 + (seed && !known ? 50 : 0), eligible: energy >= 18 && !!seed, reasons: [seed && !known ? '你留下的梦种还没有弄明白，需要先查资料' : '梦种的叶片还有一个没弄明白的小变化'] },
       { kind: 'rest', score: 8 + Math.max(0, 60 - energy) * 1.8 + (hour >= 22 || hour < 7 ? 30 : 0), eligible: true, reasons: [energy < 45 ? '精神不足，先休息更合适' : hour >= 22 || hour < 7 ? '夜深了，身体想慢下来' : '她也想留一点不做事的时间'] },
       { kind: 'break', score: 13 + p.quiet * 15 + (weather === '雨后' ? 18 : 0), eligible: true, reasons: [weather === '雨后' ? '雨刚停，窗边有新鲜的气味' : '看看窗外，给脑袋换一点空气'] },
       { kind: 'cook', score: 13 + (s.home.pantry.snacks < 2 ? 24 : 0), eligible: s.home.pantry.herbs+s.home.pantry.berries>0 && energy>18, reasons:[s.home.pantry.snacks<2?'茶点快吃完了，想用已有材料做一点':'想试试院里带回来的材料'] },
@@ -91,6 +94,7 @@
       { kind: 'plant', score: plantReady ? 80 : 0, eligible: !!plantReady, reasons: [plantReady ? '已经学会这颗梦种的种植方法' : seed && seed.proposal.kind === 'plant' ? '先研究这颗梦种，不能凭空知道怎么种' : '目前没有已经学会种法的植物提案'] },
       { kind: 'fish', score: 0, eligible: false, reasons: ['还没有鱼竿，也还没开放河岸路线'] }
     ];
+    rows.push(...H.rows(s,at));
     for (const row of rows) { if (row.kind === previous) { row.score *= .3; row.reasons.push('刚做过，暂时更想换件事'); } row.score = Math.round(row.score); row.reason = row.reasons.join('；'); }
     return rows;
   }
@@ -113,6 +117,7 @@
     s.memories = s.memories.slice(-LIMITS.memories);
   }
   function spec(s, kind) {
+    if(H.ids.includes(kind))return H.spec(s,kind);
     const d = ACTIVITIES[kind];
     const a = { kind, title: d.title, detail: d.detail, place: d.place, durationMs: d.durations[Math.floor(random(s) * d.durations.length)] * MINUTE };
     if (kind === 'read') {
@@ -141,6 +146,7 @@
     if (!s.activity.decision) s.activity.decision = { reasons: ['你们一起决定了接下来做这件事'], reason: '你们一起决定了接下来做这件事', candidates: scores(s, now), sourceIds: a.fragmentId ? [a.fragmentId] : [] };
     if (a.fragmentId) { const f = s.fragments.find(v => v.id === a.fragmentId); if (f) f.status = 'making'; }
     if (a.studyFragmentId) { const f = s.fragments.find(v => v.id === a.studyFragmentId); if (f) f.status = 'studying'; }
+    if(H.ids.includes(a.kind)){H.begin(s,s.activity,now);}
     event(s, 'activity:' + s.activity.id, 'decision', s.activity.title + '：' + s.activity.decision.reason, now, s.activity.decision.sourceIds);
   }
   function pause(s, now) {
@@ -165,6 +171,7 @@
   function finish(s, at) {
     const a = s.activity;
     const h = s.home;
+    if(H.ids.includes(a.kind)){const outcome=H.finish(s,a,at,id(s,'keepsake'));if(outcome){event(s,'result:'+a.id,'hobby',outcome.text,at,outcome.sources);if(outcome.done){remember(s,'hobby:'+outcome.work.id,outcome.text,at,'creation');learn(s,'hobby:'+a.kind,'学会了'+H.PROJECTS[a.kind].name+'：'+H.PROJECTS[a.kind].steps.map(v=>v[0]).join(' → ')+'。',at,outcome.sources);}}}
     if (['cook','tidy','gather','birdwatch','stargaze','picnic'].includes(a.kind)) {
       h.counts[a.kind]++;
       let result = '';
@@ -263,7 +270,7 @@
   }
   function create(now) {
     now = time(now === undefined ? Date.now() : now);
-    const s = { version: 3, home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
+    const s = { version: 4, hobbies:H.fresh(), arcadeProgress:A.cleanProgress(null), home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
       activity: null, queue: [], paused: [], books: BOOKS.map(b => ({ id: b.id, readCount: 0, lastReadAt: null })),
       fragments: [], creations: [], memories: [], preferences: { name: '小罗', curiosity: .78, bookish: .7, quiet: .62, utcOffsetMinutes:480 }, board: null, position: { x: 480, y: 895 }, lastBookId: null,
       world: { weather: '薄云', energy: 78, day: 0, hour: 0, lastUpdatedAt: now }, knowledge: [], events: [], plants: [], discoveries: [] };
@@ -310,7 +317,7 @@
       picnic:['给你留了半边长椅。','今天的茶点有小院的味道。'],
       game: ['轮到你了。我把刚才的事情记着呢。'], craft: ['你的那一点日常，正在慢慢有了形状。', '我想把边角也弄得圆圆的。', '快好了，等下放到收藏架上。']
     };
-    const lines = thoughts[a.kind] || thoughts.rest;
+    const lines = H.ids.includes(a.kind)?[a.detail,'这个做到一半了。你想加入，或先玩会儿游戏都可以。']:thoughts[a.kind] || thoughts.rest;
     return { title: a.title, detail: a.detail, progress: p, remainingMs: Math.max(0, a.endsAt - now), place: a.place, excerpt,
       thought: lines[Math.min(lines.length - 1, Math.floor(p * lines.length))], next: [...s.paused].reverse().map(v => '继续' + v.title).concat(s.queue.map(v => v.title)).slice(0, 3),
       paused: s.paused.length ? s.paused[s.paused.length - 1].title : null, kind: a.kind, scene:a.place.startsWith('garden')?'courtyard':'cottage',
@@ -329,7 +336,8 @@
   }
   function invite(s,kind,options,now) {
     options=options||{};advance(s,now);now=s.lastAdvancedAt;
-    if(!['read','tea','break','rest','cook','tidy','gather','birdwatch','stargaze','picnic'].includes(kind))throw Error('这件事还没准备好');
+    if(!['read','tea','break','rest','cook','tidy','gather','birdwatch','stargaze','picnic',...H.ids].includes(kind))throw Error('这件事还没准备好');
+    if(H.ids.includes(kind)){if(stateProjectResume(s,kind,now))return s.activity;if(!H.available(s,kind))throw Error('先去小院采一份'+(H.PROJECTS[kind].cost==='herbs'?'香草':'浆果')+'吧');}
     const row=scores(s,now).find(c=>c.kind===kind);if(row&&!row.eligible)throw Error(kind==='stargaze'?'等夜色来了、雨停了，再一起看星星吧':kind==='picnic'?'白天不下雨时，带一份茶点再去野餐吧':'现在有点晚或有些累，先歇歇再来吧');
     const a=spec(s,kind);a.userInitiated=true;
     if(kind==='cook'||kind==='gather') {
@@ -339,10 +347,13 @@
       a.detail=kind==='cook'?'一份材料，做成两份茶点。装盒后可以带到小院吃。':'沿小路找找成熟的'+(a.material==='herbs'?'香草':'浆果')+'，这一趟带回两份。';
     }
     if(kind==='read'&&options.bookId){a.bookId=allowed(options.bookId,BOOKS.map(b=>b.id));a.title='在读《'+BOOKS.find(b=>b.id===a.bookId).title+'》';}
+    if(H.ids.includes(kind))a.durationMs=60000;
     if(['cook','tidy','gather','birdwatch','stargaze','picnic'].includes(kind))a.durationMs=90000;
     a.decision={reason:'你邀请她一起'+a.title.replace(/^一起/, '')+'；'+(row?row.reason:'想在日常里留一点共同的时间'),reasons:['你邀请她一起做这件事',...(row?row.reasons:[])],candidates:scores(s,now),sourceIds:[]};
     pause(s,now);start(s,a,now);fillQueue(s);return s.activity;
   }
+  function stateProjectResume(s,kind,now){if(s.activity.kind===kind)return true;const index=s.paused.findIndex(a=>a.kind===kind);if(index<0)return false;const a=s.paused.splice(index,1)[0];pause(s,now);s.paused.push(a);restore(s,now);return true;}
+  function focusHobby(s,kind,now){advance(s,now);if(kind!==null&&!H.ids.includes(kind))throw Error('没有这种兴趣');s.hobbies.focus=kind;fillQueue(s);}
   function homeAction(s,kind,now) {
     advance(s,now);const h=s.home;let message;
     if(kind==='lamp'){h.lamp=!h.lamp;message=h.lamp?'小灯亮起来了。':'把小灯调暗，留一点安静。';}
@@ -353,7 +364,7 @@
     event(s,'home:'+kind+':'+Math.floor(s.lastAdvancedAt/MINUTE),'care',message,s.lastAdvancedAt,[]);return message;
   }
   function setClockOffset(s,offset,now){number(offset,-840,840,'时区');if(!Number.isInteger(offset))throw Error('时区无效');advance(s,now);s.preferences.utcOffsetMinutes=offset;updateWorld(s,s.lastAdvancedAt);}
-  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):false;if(!done)throw Error('这一局还没完成');const names={sudoku:'解开了小罗出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
+  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):kind==='link'?A.isLinkDone(b):kind==='match3'?A.isMatchDone(b):false;if(!done)throw Error('这一局还没完成');if(kind==='link')s.arcadeProgress.link[b.level-1]=Math.max(s.arcadeProgress.link[b.level-1],Math.max(1,3-Math.min(2,b.helps)));if(kind==='match3')s.arcadeProgress.match3[b.level-1]=Math.max(s.arcadeProgress.match3[b.level-1],b.score);const names={link:'一起玩过连连看的第 '+b.level+' 关',match3:'一起玩过消消乐的第 '+b.level+' 关',sudoku:'解开了小罗出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
   function holdGame(s, now) {
     now = Math.max(time(now === undefined ? Date.now() : now), s.lastAdvancedAt);
     if (s.activity.kind !== 'game') return advance(s, now);
@@ -469,10 +480,10 @@
 
   function validate(value, now) {
     now = time(now === undefined ? Date.now() : now);
-    if (!value || typeof value !== 'object' || ![2,3].includes(value.version)) throw new Error('这不是当前版本的游戏存档');
+    if (!value || typeof value !== 'object' || ![2,3,4].includes(value.version)) throw new Error('这不是当前版本的游戏存档');
     // Only whitelisted fields are copied; never merge imported objects into prototypes.
     const serial = number(value.serial, 0, 1000000000, '序号');
-    const s = { version: 3, home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
+    const s = { version: 4, hobbies:H.clean(value.hobbies), arcadeProgress:A.cleanProgress(value.arcadeProgress), home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
       activity: cleanActivity(value.activity), queue: list(value.queue, 12).map(a => cleanActivity(a, true)), paused: list(value.paused, 8).map(a => cleanActivity(a)),
       books: [], fragments: [], creations: [], memories: [], preferences: { utcOffsetMinutes: value.preferences && value.preferences.utcOffsetMinutes !== undefined ? number(value.preferences.utcOffsetMinutes,-840,840,'时区') : 480, name: cleanText(value.preferences && value.preferences.name || '小罗', 30), curiosity: number(value.preferences && value.preferences.curiosity === undefined ? .78 : value.preferences.curiosity, 0, 1, '性格'), bookish: number(value.preferences && value.preferences.bookish === undefined ? .7 : value.preferences.bookish, 0, 1, '性格'), quiet: number(value.preferences && value.preferences.quiet === undefined ? .62 : value.preferences.quiet, 0, 1, '性格') }, board: cleanBoard(value.board),
       position: { x: number(value.position && value.position.x, 0, 941, '位置'), y: number(value.position && value.position.y, 0, 1672, '位置') }, lastBookId: BOOKS.some(b => b.id === value.lastBookId) ? value.lastBookId : null,
@@ -507,8 +518,13 @@
     if (s.activity.plantFragmentId && !s.knowledge.some(k => k.key === 'seed:' + s.activity.plantFragmentId)) throw new Error('种植计划尚未掌握知识');
     if (s.activity.knowledgeFragmentId && !s.knowledge.some(k => k.key === 'seed:' + s.activity.knowledgeFragmentId)) throw new Error('制作计划尚未掌握材料和方法');
     if (s.activity.kind === 'craft' && !s.knowledge.some(k => k.key === 'seed:' + s.activity.fragmentId)) throw new Error('制作计划尚未掌握材料和方法');
+    const hobbyActivities=[s.activity,...s.paused].filter(a=>H.ids.includes(a.kind));
+    if(new Set(hobbyActivities.map(a=>a.kind)).size!==hobbyActivities.length)throw Error('兴趣计划重复进行');
+    for(const a of hobbyActivities){const p=s.hobbies.projects[a.kind];if(!p.paid||a.projectStage!==p.stage||a.projectEdition!==p.editions+1)throw Error('兴趣计划与进度不一致');}
+    for(const w of s.hobbies.works)if(w.sourceIds.some(id=>!fids.has(id)))throw Error('兴趣作品缺少梦种来历');
+    for(const k of H.ids)if(s.hobbies.projects[k].sourceIds.some(id=>!fids.has(id)))throw Error('兴趣计划缺少梦种来历');
     // Sequence cannot be rolled back by a malformed import and collide with existing IDs.
-    const ids = [s.activity.id, ...s.paused.map(a => a.id), ...s.fragments.map(f => f.id), ...s.creations.map(c => c.id), ...s.memories.map(m => m.id), ...s.events.map(v => v.id), ...s.knowledge.map(v => v.id), ...s.plants.map(v => v.id), ...s.discoveries.map(v => v.id)];
+    const ids = [...s.hobbies.works.map(w=>w.id),s.activity.id, ...s.paused.map(a => a.id), ...s.fragments.map(f => f.id), ...s.creations.map(c => c.id), ...s.memories.map(m => m.id), ...s.events.map(v => v.id), ...s.knowledge.map(v => v.id), ...s.plants.map(v => v.id), ...s.discoveries.map(v => v.id)];
     s.serial = Math.max(s.serial, ...ids.filter(Boolean).map(v => Number(v.split('-').pop()) || 0));
     // The saved board remains available, but a closed session is not a live
     // invitation. Resume her bookmarked life from the last saved instant.
@@ -537,6 +553,7 @@
       result.id = ident(a.id); result.startedAt = stamp(a.startedAt); result.endsAt = stamp(a.endsAt); result.progressBase = number(a.progressBase || 0, 0, 1, '活动进度');
       if (result.endsAt <= result.startedAt || result.endsAt - result.startedAt > result.durationMs + 1) throw new Error('活动时间不合理');
     }
+    if(H.ids.includes(kind)&&!a.tentative){result.projectStage=number(a.projectStage,0,2,'兴趣步骤');result.projectEdition=number(a.projectEdition,1,1000000,'兴趣作品');if(!Number.isInteger(result.projectStage)||!Number.isInteger(result.projectEdition))throw Error('兴趣步骤不正确');}
     if (a.material) result.material=allowed(a.material,['herbs','berries']);
     if (kind === 'read') result.bookId = allowed(a.bookId, BOOKS.map(b => b.id));
     if (kind === 'craft') result.fragmentId = ident(a.fragmentId);
@@ -545,7 +562,8 @@
     if (a.knowledgeFragmentId) result.knowledgeFragmentId = ident(a.knowledgeFragmentId);
     if (a.energyAtStart !== undefined) result.energyAtStart = number(a.energyAtStart, 0, 100, '精神');
     if (a.tentative === true) result.tentative = true;
-    if (a.decision) result.decision = { reason: cleanText(a.decision.reason, 600), reasons: list(a.decision.reasons, 8).map(v => cleanText(v, 300)), candidates: list(a.decision.candidates || [], 20).map(c => ({ kind: cleanText(c.kind, 20), score: number(c.score, 0, 1000), eligible: c.eligible === true, reasons: list(c.reasons || [], 8).map(v => cleanText(v, 300)), reason: cleanText(c.reason || '', 600) })), sourceIds: list(a.decision.sourceIds || [], 8).map(ident) };
+    if (a.decision) result.decision = { reason: cleanText(a.decision.reason, 600), reasons: list(a.decision.reasons, 8).map(v => cleanText(v, 300)), candidates: list(a.decision.candidates || [], 32).map(c => ({ kind: cleanText(c.kind, 20), score: number(c.score, 0, 1000), eligible: c.eligible === true, reasons: list(c.reasons || [], 8).map(v => cleanText(v, 300)), reason: cleanText(c.reason || '', 600) })), sourceIds: list(a.decision.sourceIds || [], 8).map(ident) };
+    if(a.decision?.kind)result.decision.kind=allowed(a.decision.kind,Object.keys(ACTIVITIES));
     if (a.userInitiated === true) result.userInitiated = true;
     return result;
   }
@@ -558,5 +576,5 @@
     return result;
   }
   function exportState(s) { return JSON.stringify({ ...s, exportedAt: Date.now() }, null, 2); }
-  return { create, advance, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
+  return { create, advance, focusHobby, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
 });

@@ -26,3 +26,10 @@
 ## v0.3扩充验证
 
 Node运行 tests/expansion-tests.js（小游戏与资源/迁移/双场景寻路）。启动隔离18766测试服务后打开 tests/expansion-ui.html（实际页面10项），再单独运行 tests/ui-smoke.html（原有9项）。不要同时运行两个会改测试源存储的页面。包清单、Pages白名单、index资源版本与sw缓存版本必须一起更新；部署后在原网址确认v0.3。
+
+
+## v0.4检查与发布
+
+新增 Node `tests/arcade-tests.js`，浏览器 `tests/arcade-ui.html`（隔离18766，320像素宽）。再分别跑expansion-ui与ui-smoke，禁止同时操作同一测试源存档。新规则脚本arcade/hobbies先于life加载；tokens先于arcade-ui/app加载。
+
+发布同时更新index、sw、Pages staging、prepare-release.py与package.ps1的明确清单。直接在原网址检查v0.4和六游戏入口，不只以Actions成功替代实际页面检查。

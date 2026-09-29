@@ -30,6 +30,6 @@
  function flipPair(s,index){int(index,0,11);if(s.open.length===2||s.open.includes(index)||s.matched.includes(index))return false;s.open.push(index);if(s.open.length===2)s.moves++;return true;}
  function resolvePair(s){if(s.open.length!==2)return false;const[a,b]=s.open,match=s.deck[a]===s.deck[b];if(match)s.matched.push(a,b);s.open=[];return match;}
  const isPairsDone=s=>s.matched.length===12;
- function cleanBox(value){const x=value||{};return{sudoku:x.sudoku?cleanSudoku(x.sudoku):null,puzzle:x.puzzle?cleanPuzzle(x.puzzle):null,pairs:x.pairs?cleanPairs(x.pairs):null};}
+ function cleanBox(value){const x=value||{},A=globalThis.WitchArcade||(typeof require==='function'?require('./arcade.js'):null);return{link:x.link?A.cleanLink(x.link):null,match3:x.match3?A.cleanMatch(x.match3):null,sudoku:x.sudoku?cleanSudoku(x.sudoku):null,puzzle:x.puzzle?cleanPuzzle(x.puzzle):null,pairs:x.pairs?cleanPairs(x.pairs):null};}
  return{rng,shuffle,clone,solve,sudoku,cleanSudoku,enterSudoku,conflicts,isSudokuDone,hintSudoku,puzzle,cleanPuzzle,swapPuzzle,isPuzzleDone,pairs,cleanPairs,flipPair,resolvePair,isPairsDone,cleanBox};
 });
