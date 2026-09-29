@@ -42,3 +42,18 @@ Demo上限：240颗梦种、120件物品、近期80条精选记忆、160条因�
 - playbox.match3：局号、level、board、movesLeft、turns、score、collected、helps、rng、celebrated。只保存结算完成的无三连棋盘，检验长度、取值、步数上界和最低得分一致性。
 
 导入后的决策kind也保留，以便状态往返等价。手作、关卡与梦种均通过原有导出/导入跨设备转移，没有新增远程上传。
+
+
+## v5 迁移（2026-09-29）
+
+外层version=5，接受2/3/4/5，键仍为witchlife-world-v2；首次升级另存witchlife-world-v2-before-v5。旧版本忽略新avatar字段并使用original，防止版本伪装改变初始绑定。其他原有规则、引用校验继续保留。
+
+- avatar：kind=unbound/original/creature/portrait，form、body/accent十六进制、bio≤400、portrait≤650000字符的PNG/JPEG/WebP data URL；拒绝外链/SVG。界面上传最多8MB并缩至320像素。
+- country：coins、rod、bait、四作物种子、背包、五鱼种库存和累计图鉴、6个plots、harvests/casts/visits、session。一竿有距离、张力、动作数、随机状态、咬钩时间、阶段及结算标记。
+- plot：crop/sownAt/lastAt/workMs/waterUntil。成熟度上限按具体作物，保存到最后结算时刻。无离线枯萎。
+- activity.gardenJob/ fishSpecies：保存开工计划与鱼种，导入严格枚举。原暂停栈保留这些字段。
+- learning.go：0–6页教学进度。playbox.go/xiangqi保存合法着手历史；回放重建棋盘、轮次、胜负，导入不信任可伪造的棋子数组。
+- go附加连续停手、续弈标记、死子列表、计分确认；xiangqi采用三次同局面和棋。每盘最多400着，回放限制避免无限数据。
+- playbox.link的mode/flow与对应尺寸/地形守恒；playbox.match3的mode/specials/frost/gravity。arcadeProgress.linkVariants与matchVariants按模式分别记成绩，旧link/match3数组原样保留。
+
+图片跟随导出JSON跨设备带走，仍没有自动同步或服务器保存。地图美术为公开运行资产，玩家立绘不进发布包。

@@ -1,0 +1,19 @@
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.WitchCompanions=api;})(globalThis,function(){
+ 'use strict';const FORMS={sprout:'芽芽精灵',fox:'林间小狐',moth:'月光小蛾'},PALETTES={moss:['#86a576','#e7c78d'],plum:['#a398b9','#e5c9ae'],river:['#7ea4b3','#e7d4ab'],amber:['#c99668','#f0debd']};
+ const fresh=()=>({kind:'unbound',form:'sprout',body:'#86a576',accent:'#e7c78d',bio:'',portrait:null});
+ function txt(v,n){if(typeof v!=='string'||v.length>n||/\u0000/.test(v))throw Error('角色文字太长或格式不正确');return v;}
+ function clean(v,legacy=false){if(!v)return legacy?{...fresh(),kind:'original'}:fresh();if(!['unbound','original','creature','portrait'].includes(v.kind)||!Object.hasOwn(FORMS,v.form))throw Error('角色形态不正确');for(const k of ['body','accent'])if(!/^#[0-9a-f]{6}$/i.test(v[k]))throw Error('角色配色格式不正确');let portrait=null;if(v.portrait!==null&&v.portrait!==undefined){if(typeof v.portrait!=='string'||v.portrait.length>650000||!/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(v.portrait))throw Error('角色图片需为本地PNG、JPEG或WebP小图');portrait=v.portrait;}if(v.kind==='portrait'&&!portrait)throw Error('角色图片缺失');return{kind:v.kind,form:v.form,body:v.body,accent:v.accent,bio:txt(v.bio||'',400),portrait};}
+ function proposal(value){if(!value||typeof value!=='object')throw Error('角色方案需要JSON对象');const name=txt(value.name,16).trim();if(!name)throw Error('给伙伴取一个名字吧');const avatar=clean({kind:'creature',form:value.form||'sprout',body:value.body||'#86a576',accent:value.accent||'#e7c78d',bio:value.bio||'',portrait:null});const p=value.personality||{},personality={};for(const k of ['curiosity','bookish','quiet']){const n=p[k]??.6;if(!Number.isFinite(n)||n<0||n>1)throw Error('性格倾向需在0到1之间');personality[k]=n;}return{name,avatar,personality};}
+ function draw(ctx,avatar,x,y,h,step,walking,flip,portrait){ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);const bob=walking?Math.sin(step*18)*2:0;ctx.translate(0,bob);ctx.imageSmoothingEnabled=false;
+  if(avatar.kind==='portrait'&&portrait?.complete&&portrait.naturalWidth){const max=h*.82,r=Math.min(max/portrait.naturalWidth,max/portrait.naturalHeight),w=portrait.naturalWidth*r,ht=portrait.naturalHeight*r;ctx.drawImage(portrait,-w/2,-ht,w,ht);ctx.restore();return;}
+  ctx.scale(h/48,h/48);const c=avatar.body,a=avatar.accent,ink='#39453b';ctx.fillStyle=ink;const leg=walking?Math.sin(step*18)*1.5:0;ctx.fillRect(-8,-5+leg,5,5);ctx.fillRect(3,-5-leg,5,5);
+  if(avatar.form==='fox'){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(9,-17);ctx.lineTo(19,-24);ctx.lineTo(17,-8);ctx.lineTo(7,-6);ctx.fill();ctx.fillStyle=a;ctx.fillRect(15,-21,4,7);}
+  if(avatar.form==='moth'){ctx.fillStyle=a;for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(side*12,-23,9,14,side*.3,0,Math.PI*2);ctx.fill();ctx.fillStyle=c;ctx.fillRect(side*13-2,-28,4,4);ctx.fillStyle=a;}}
+  ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(-11,-29,22,25,7);ctx.fill();ctx.fillStyle=a;ctx.fillRect(-9,-15,18,4);ctx.fillStyle=c;
+  if(avatar.form==='fox'){ctx.beginPath();ctx.moveTo(-12,-31);ctx.lineTo(-14,-46);ctx.lineTo(-4,-39);ctx.lineTo(4,-39);ctx.lineTo(14,-46);ctx.lineTo(12,-31);ctx.fill();}
+  if(avatar.form==='sprout'){ctx.fillStyle='#5d7c55';ctx.fillRect(-1,-45,3,8);ctx.beginPath();ctx.ellipse(-5,-45,6,3,.4,0,Math.PI*2);ctx.ellipse(5,-47,6,3,-.4,0,Math.PI*2);ctx.fill();}
+  if(avatar.form==='moth'){ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-5,-36);ctx.lineTo(-9,-45);ctx.moveTo(5,-36);ctx.lineTo(9,-45);ctx.stroke();}
+  ctx.fillStyle=a;ctx.beginPath();ctx.roundRect(-12,-37,24,18,7);ctx.fill();ctx.fillStyle=ink;ctx.fillRect(-7,-30,3,4);ctx.fillRect(4,-30,3,4);ctx.fillRect(-2,-23,4,1);ctx.fillStyle='#c68777';ctx.fillRect(-10,-25,3,2);ctx.fillRect(7,-25,3,2);ctx.restore();
+ }
+ return{FORMS,PALETTES,fresh,clean,proposal,draw};
+});

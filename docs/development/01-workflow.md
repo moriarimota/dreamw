@@ -33,3 +33,10 @@ Node运行 tests/expansion-tests.js（小游戏与资源/迁移/双场景寻路�
 新增 Node `tests/arcade-tests.js`，浏览器 `tests/arcade-ui.html`（隔离18766，320像素宽）。再分别跑expansion-ui与ui-smoke，禁止同时操作同一测试源存档。新规则脚本arcade/hobbies先于life加载；tokens先于arcade-ui/app加载。
 
 发布同时更新index、sw、Pages staging、prepare-release.py与package.ps1的明确清单。直接在原网址检查v0.4和六游戏入口，不只以Actions成功替代实际页面检查。
+
+
+## v0.5检查与发布
+
+Node新增tests/v5-tests.js（3档×5移动×36关全量生成/消除、3000路径对照、农事与天气、钓鱼守恒、角色迁移、围棋和象棋规则）。该测试需要数分钟，期间继续其他独立工作。浏览器新增tests/v5-ui.html，320像素实际页面覆盖角色图片上传、AI方案、农事出售、钓鱼、棋盘教学、续局。随后独立运行旧arcade-ui/expansion-ui/ui-smoke；不要并发改相同来源的存档。
+
+新增运行文件清单在index、sw、Pages workflow、prepare-release.py、package.ps1同步。源代码包包含设计文档和测试；运行包排除测试与个人资料。河畔美术生成提示在design/riverbank-v1-prompt.md，公开PNG在game/assets/riverbank-v1.png。
