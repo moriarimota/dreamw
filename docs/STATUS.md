@@ -6,7 +6,7 @@
 
 本地入口：`D:/WitchLife/启动梦乡.exe`。本轮代码已写入 D 盘运行目录。完整界面回归 9/9 已通过，覆盖 320、390、402、1280 宽度；实际检查了室外地面。iPhone 真机尚未测试。
 
-[手机与网页](https://moriarimota.github.io/dreamw/) · [代码与设计库](https://github.com/moriarimota/dreamw)。v0.7.1 正在从 `codex/dream-v6` 分支发布；部署成功前公网仍按旧版对待。GitHub 插件授权过期，但已登录的网页上传通道可用。
+[手机与网页](https://moriarimota.github.io/dreamw/) · [代码与设计库](https://github.com/moriarimota/dreamw)。v0.7.1 已于 2026-10-04 发布：[PR #1](https://github.com/moriarimota/dreamw/pull/1) 合入 `c76067d4d2ae0417218351dd23dc15980c3c57bb`，[Pages #6](https://github.com/moriarimota/dreamw/actions/runs/37145412175) 成功。公网 56 个可请求运行文件与本地版本一致；网页实际完成保存后更新，设置显示“离线已就绪 · v0.7.1 · 53 项素材”。GitHub 插件仍需重新授权，本次通过已登录的网页发布。
 
 ## v0.7.1 本轮调整
 
@@ -29,7 +29,7 @@
 
 ## v0.6.1 本轮调整
 
-紧凑浮动界面、房间居中、地点文字清晰度、棋盘自动适配、删除柔和配色、生活用语；独立双腿步态、帧裁切、绕障碍与键盘转向；河面浮标及按住收线。详见 [体验调整](design/09-polish-v61.md)。本轮未确认公网部署，网页仍按旧版对待。
+紧凑浮动界面、房间居中、地点文字清晰度、棋盘自动适配、删除柔和配色、生活用语；独立双腿步态、帧裁切、绕障碍与键盘转向；河面浮标及按住收线。详见 [体验调整](design/09-polish-v61.md)。这些调整已随 v0.7.1 一起上线。
 
 ## v0.6新增
 
