@@ -21,7 +21,12 @@ jobs:
       - uses: actions/checkout@v6
       - name: Stage only the playable game
         run: |
-          mkdir -p public/assets
+          mkdir -p public/assets public/vendor
+          cp game/pocket-games.js game/pocket-ui.js game/postcards.js game/offline.js game/offline-worker.js game/offline-manifest.js game/details.css game/icon-192.png game/icon-512.png game/apple-touch-icon.png public/
+          cp game/play-layout.js game/polish-init.js game/polish.css public/
+          cp game/terrain.js game/village.js game/village-view.js game/village.css public/
+          cp game/vendor/phaser-3.90.0.min.js game/vendor/phaser-LICENSE.txt public/vendor/
+          cp game/assets/terrain-v2.png game/assets/village-props-v1.png game/assets/witch-directions-v1.png game/assets/village-actions-v1.png game/assets/cottage-map-v1.png public/assets/
           cp game/arcade-plus.js game/board-games.js game/board-games-ui.js game/country.js game/companions.js game/expedition-ui.js game/expansion.css game/tokens.js game/arcade.js game/arcade-ui.js game/arcade.css game/hobbies.js game/games.js game/games-ui.js game/games.css game/scenes.js game/scenes.css game/index.html game/style.css game/navigation.js game/life.js game/storage.js game/gomoku.js game/app.js game/sw.js game/icon.svg game/manifest.webmanifest game/.nojekyll public/
           cp game/assets/riverbank-v1.png game/assets/courtyard-v1.png game/assets/cottage-empty-v1.png game/assets/witch-walk-v1.png game/assets/dream-props-v1.png public/assets/
       - uses: actions/configure-pages@v5

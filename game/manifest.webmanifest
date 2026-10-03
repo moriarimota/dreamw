@@ -1,1 +1,26 @@
-{"name":"那边的小日子","short_name":"小日子","start_url":"./","scope":"./","display":"standalone","background_color":"#20382e","theme_color":"#20382e","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{
+  "name": "梦乡",
+  "short_name": "梦乡",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#20382e",
+  "theme_color": "#20382e",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "./",
+  "orientation": "any",
+  "description": "一段装进口袋、离线也能继续的魔法生活"
+}

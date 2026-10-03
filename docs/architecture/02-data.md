@@ -1,6 +1,6 @@
 # 状态与存档
 
-当前存档版本 `version:4`（接收v2/v3/v4）。以 `game/life.js` 的 validate 为最终可执行约束；本文给语义索引。
+当前存档版本 `version:6`（接收v2/v3/v4/v5/v6）。以 `game/life.js` 的 validate 为最终可执行约束；本文给语义索引。
 
 | 字段 | 意义 |
 | --- | --- |
@@ -12,7 +12,8 @@
 | creations/plants/discoveries | 实体物件、植物生长、发现便笺 |
 | events/memories/knowledge | 因果事件、精选经历、长期知识 |
 | preferences | 暂用名字与性格倾向 |
-| position | 画面位置；不决定活动的事实 |
+| position | 旧版兼容画面位置；v6镜头与行程不写入此字段 |
+| village | 区域坐标、旅途时间、居民关系与显示设置 |
 | board | 完整五子棋状态，含落子历史与轮次 |
 
 本地网页保存在当前来源的 localStorage；桌面版同时经本机接口保存到 `user-data/state.json`，`state.previous.json` 保存上一份。用户可以导出JSON，在其他设备导入；没有自动云同步。页面域名/端口变化会影响浏览器存档，迁移须使用导出导入或磁盘档案。
@@ -57,3 +58,20 @@ Demo上限：240颗梦种、120件物品、近期80条精选记忆、160条因�
 - playbox.link的mode/flow与对应尺寸/地形守恒；playbox.match3的mode/specials/frost/gravity。arcadeProgress.linkVariants与matchVariants按模式分别记成绩，旧link/match3数组原样保留。
 
 图片跟随导出JSON跨设备带走，仍没有自动同步或服务器保存。地图美术为公开运行资产，玩家立绘不进发布包。
+
+## v6迁移（2026-09-30）
+
+键保持witchlife-world-v2；升级前保存before-v6备份。旧档按当前活动所在位置补village，保留活动ID、阅读与其他内容，不凭空增加已经走过的经历。
+
+- village.version=1；location为area/x/y，area仅inside/village；journey可为空，或包含points、startedAt、endsAt、purpose。坐标必须在可走地面；每段检查障碍，跨区域只能经门口；purpose关联当前活动ID。
+- contacts.moss/chestnut：met、talks、borrowed、returned、readBefore、seen。借还书奖励限一次；seen引用已有creations，保存因果来源。
+- sound默认false，zoom为视图设置。相机的像素位置不入档。
+- activity.kind=walk时可含destination；连续指路沿用同一活动，不堆积paused。startedAt是抵达后的开工时间；在途中可晚于lastAdvancedAt，进度和体力计算必须钳制到零。
+
+NPC当前位置从时间和日程推导；发现事实只有createdAt不晚于当前日程段才影响该段，防止后来事件改写过去路线。基础保存仍无远程服务。
+
+## v0.7 可选字段（世界 schema 保持 6）
+
+`playbox.nonogram` / `playbox.merge` 缺省为 null。数织从 seed/size 重建题面并核验 fixed cells 和撤销记录；合成从 seed/moves 重播，棋盘或分数不符时拒绝。
+
+明信片手作可有 `letter: {from,heading,body,theme,sourceQuote}` 和 `read`。旧明信片不补编信文。letter 文字长度受限，DOM 使用 textContent；postcard sourceIds 与三个步骤 ID 保持原结构。其他手作不添加 read 字段，确保正常存档往返稳定。
