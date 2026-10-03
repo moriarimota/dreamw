@@ -1,7 +1,7 @@
 /* 梦乡：空间、路程、居民与关系。纯规则，可在离线时沿同一时间线推进。 */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.WitchVillage=api;})(globalThis,function(){
  'use strict';
- const WIDTH=2048,HEIGHT=1440,SPEED=126,CELL=32;
+ const WIDTH=2048,HEIGHT=1440,SPEED=190,CELL=16;
  const point=(area,x,y)=>({area,x,y});
  const HOME=point('village',480,528),DOOR=point('inside',512,660);
  const SPOTS={
@@ -50,30 +50,41 @@
  }
  function nearest(p){if(walkable(p.area,p.x,p.y))return point(p.area,p.x,p.y);let best=null,bd=Infinity;const w=p.area==='inside'?1024:WIDTH,h=p.area==='inside'?768:HEIGHT;for(let y=288;y<h;y+=CELL)for(let x=160;x<w;x+=CELL)if(walkable(p.area,x,y)){const d=(x-p.x)**2+(y-p.y)**2;if(d<bd){best=point(p.area,x,y);bd=d;}}return best||{...HOME};}
  function lineClear(a,b){if(a.area!==b.area)return false;const steps=Math.ceil(dist(a,b)/6);for(let i=0;i<=steps;i++){const t=steps?i/steps:0;if(!walkable(a.area,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t))return false;}return true;}
- const cache=new Map();
+ const cache=new Map(),routeCache=new Map();
  function localRoute(a,b){
   a=nearest(a);b=nearest(b);if(lineClear(a,b))return[a,b];
+  const memo=[a.area,a.x,a.y,b.x,b.y].join(':');if(routeCache.has(memo))return routeCache.get(memo).map(p=>({...p}));
   const gridPoint=p=>{let best=null,bd=Infinity;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const q=point(p.area,Math.round(p.x/CELL)*CELL+dx*CELL,Math.round(p.y/CELL)*CELL+dy*CELL);if(walkable(q.area,q.x,q.y)&&lineClear(p,q)&&dist(p,q)<bd){bd=dist(p,q);best=q;}}return best;};
   const start=gridPoint(a),end=gridPoint(b);if(!start||!end)throw Error('这条小路暂时走不通');
-  const key=p=>p.x+','+p.y,ek=key(end),sk=key(start),open=[start],cost=new Map([[sk,0]]),from=new Map(),done=new Set();let found=false;
-  while(open.length){let index=0;for(let i=1;i<open.length;i++)if(cost.get(key(open[i]))+dist(open[i],end)<cost.get(key(open[index]))+dist(open[index],end))index=i;const cur=open.splice(index,1)[0],ck=key(cur);if(done.has(ck))continue;done.add(ck);if(ck===ek){found=true;break;}for(const[dx,dy]of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const q=point(a.area,cur.x+dx*CELL,cur.y+dy*CELL),qk=key(q);if(done.has(qk)||!walkable(q.area,q.x,q.y)||!lineClear(cur,q))continue;const n=cost.get(ck)+Math.hypot(dx,dy)*CELL;if(n<(cost.get(qk)??Infinity)){cost.set(qk,n);from.set(qk,cur);open.push(q);}}}
-  if(!found)throw Error('这条小路暂时走不通');let q=end,route=[b,end];while(key(q)!==sk){q=from.get(key(q));route.push(q);}route.push(a);route.reverse();const smooth=[route[0]];let i=0;while(i<route.length-1){let j=route.length-1;while(j>i+1&&!lineClear(route[i],route[j]))j--;smooth.push(route[j]);i=j;}return smooth;
+  const key=p=>p.x+','+p.y,ek=key(end),sk=key(start),heap=[],cost=new Map([[sk,0]]),from=new Map(),done=new Set();let found=false;
+  function push(p,g){const node={p,g,f:g+dist(p,end)};heap.push(node);let i=heap.length-1;while(i>0){const parent=(i-1)>>1;if(heap[parent].f<=node.f)break;heap[i]=heap[parent];i=parent;}heap[i]=node;}
+  function pop(){const top=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1].f<heap[child].f)child++;if(last.f<=heap[child].f)break;heap[i]=heap[child];i=child;}heap[i]=last;}return top;}
+  push(start,0);
+  while(heap.length){const entry=pop(),cur=entry.p,ck=key(cur);if(done.has(ck)||entry.g!==cost.get(ck))continue;done.add(ck);if(ck===ek){found=true;break;}for(const[dx,dy]of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const q=point(a.area,cur.x+dx*CELL,cur.y+dy*CELL),qk=key(q);if(done.has(qk)||!walkable(q.area,q.x,q.y)||!lineClear(cur,q))continue;const n=entry.g+Math.hypot(dx,dy)*CELL;if(n<(cost.get(qk)??Infinity)){cost.set(qk,n);from.set(qk,cur);push(q,n);}}}
+  if(!found)throw Error('这条小路暂时走不通');let q=end,route=[b,end];while(key(q)!==sk){q=from.get(key(q));route.push(q);}route.push(a);route.reverse();const smooth=[route[0]];let i=0;while(i<route.length-1){let j=route.length-1;while(j>i+1&&!lineClear(route[i],route[j]))j--;smooth.push(route[j]);i=j;}routeCache.set(memo,smooth.map(p=>({...p})));if(routeCache.size>256)routeCache.delete(routeCache.keys().next().value);return smooth;
  }
  function route(a,b){if(a.area===b.area)return localRoute(a,b);return a.area==='inside'?[...localRoute(a,DOOR),HOME,...localRoute(HOME,b).slice(1)]:[...localRoute(a,HOME),DOOR,...localRoute(DOOR,b).slice(1)];}
  function distance(points){let n=0;for(let i=1;i<points.length;i++)n+=dist(points[i-1],points[i]);return n;}
  function interpolate(j,at){const points=j.points,total=distance(points),fraction=Math.max(0,Math.min(1,(at-j.startedAt)/Math.max(1,j.endsAt-j.startedAt)));let t=fraction;
+  if(fraction>=1)return{...points.at(-1),moving:false,dx:0,dy:1};
   // Short easing only at departure and arrival; most of a journey keeps a steady stride.
-  const edge=Math.min(.12,300/Math.max(1,j.endsAt-j.startedAt));if(t<edge)t=t*t/(2*edge);else if(t>1-edge)t=1-(1-t)*(1-t)/(2*edge);else t=(t-edge/2)/(1-edge); // normalized below with a continuous piecewise curve
-  const u=fraction,e=edge;t=u<e?u*u/(2*e*(1-e)):u>1-e?1-(1-u)**2/(2*e*(1-e)):(u-e/2)/(1-e);
+  const e=Math.min(.06,70/Math.max(1,j.endsAt-j.startedAt)),u=fraction;t=u<e?u*u/(2*e*(1-e)):u>1-e?1-(1-u)**2/(2*e*(1-e)):(u-e/2)/(1-e);
   let d=total*t;for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],len=dist(a,b);if(d<=len){if(a.area!==b.area)return{...(d<len*.5?a:b),moving:fraction<1,dx:0,dy:a.area==='inside'?-1:1};const f=len?d/len:1;return{area:a.area,x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,moving:fraction>0&&fraction<1,dx:b.x-a.x,dy:b.y-a.y};}d-=len;}return{...points.at(-1),moving:false,dx:0,dy:1};}
  function destination(a){if(a.destination)return nearest(a.destination);const id={bed:'books',fire:'stove',desk:'desk',rug:'bed',window:'books',shelf:'display',gardenPath:a.material==='berries'?'berries':'herbs',gardenBench:'bench',riverFarm:'farm',riverJetty:'fishing',riverShop:'shop'}[a.place]||'bed';return nearest(SPOTS[id]);}
  function fresh(a){return{version:1,location:destination(a),journey:null,contacts:{moss:{met:false,talks:0,borrowed:false,returned:false,readBefore:0,seen:[]},chestnut:{met:false,talks:0,borrowed:false,returned:false,readBefore:0,seen:[]}},sound:false,zoom:1};}
  function position(s,at){const v=s.village;return v.journey?interpolate(v.journey,at):{...v.location,moving:false,dx:0,dy:1};}
  function settle(s,at){if(!s.village)return;const p=position(s,at);s.village.location=point(p.area,p.x,p.y);if(s.village.journey&&at>=s.village.journey.endsAt)s.village.journey=null;}
- function begin(s,a,at){if(!s.village)return 0;settle(s,at);s.village.journey=null;if(a.kind==='game')return 0;const target=destination(a),points=route(s.village.location,target),length=distance(points);if(length<2)return 0;const ms=Math.ceil(length/SPEED*1000)+400;s.village.journey={points,startedAt:at,endsAt:at+ms,purpose:a.id};return ms;}
+ function begin(s,a,at){if(!s.village)return 0;settle(s,at);s.village.journey=null;if(a.kind==='game')return 0;const target=destination(a),points=route(s.village.location,target),length=distance(points);if(length<2)return 0;const ms=Math.ceil(length/SPEED*1000)+80;s.village.journey={points,startedAt:at,endsAt:at+ms,purpose:a.id};return ms;}
  function clean(v,a){if(!v)return fresh(a);if(v.version!==1)throw Error('地图存档版本不正确');const finite=(n,min,max)=>{if(!Number.isFinite(n)||n<min||n>max)throw Error('地图数值不正确');return n;};const cp=p=>{if(!p||!['inside','village'].includes(p.area))throw Error('地图地点不正确');const q=point(p.area,finite(p.x,0,p.area==='inside'?1024:WIDTH),finite(p.y,0,p.area==='inside'?768:HEIGHT));if(!walkable(q.area,q.x,q.y))throw Error('人物位置不在可行走区域');return q;};const out=fresh(a);out.location=cp(v.location);out.zoom=[.65,1,1.3].includes(v.zoom)?v.zoom:1;out.sound=v.sound===true;
   for(const id of ['moss','chestnut']){const c=v.contacts?.[id];if(!c)continue;if(!Array.isArray(c.seen)||c.seen.length>120||c.seen.some(x=>typeof x!=='string'||!/^creation-\d+$/.test(x)))throw Error('居民记忆不正确');out.contacts[id]={met:c.met===true,talks:Math.floor(finite(c.talks,0,1000000)),borrowed:c.borrowed===true,returned:c.returned===true,readBefore:finite(c.readBefore,0,1000000),seen:[...new Set(c.seen)]};}
   if(v.journey){const j=v.journey;if(!Array.isArray(j.points)||j.points.length<2||j.points.length>160)throw Error('路程格式不正确');const points=j.points.map(cp);for(let i=1;i<points.length;i++){const x=points[i-1],y=points[i];if(x.area!==y.area){if(!(dist(x,x.area==='inside'?DOOR:HOME)<1&&dist(y,y.area==='inside'?DOOR:HOME)<1))throw Error('路程不能穿过墙壁');}else if(!lineClear(x,y))throw Error('路程不能穿过障碍');}const startedAt=finite(j.startedAt,0,8640000000000000),endsAt=finite(j.endsAt,startedAt+1,startedAt+120000);if(typeof j.purpose!=='string'||j.purpose.length>40)throw Error('路程目标不正确');out.journey={points,startedAt,endsAt,purpose:j.purpose};}return out;
+ }
+
+ function steer(p,dx,dy,length=90){
+  const norm=Math.hypot(dx,dy)||1;dx/=norm;dy/=norm;
+  function ray(x,y){let q=p;for(let d=4;d<=length;d+=4){const n=point(p.area,p.x+x*d,p.y+y*d);if(!lineClear(p,n))break;q=n;}return q;}
+  const full=ray(dx,dy);if(dist(p,full)>12||!dx||!dy)return full;
+  const x=ray(dx,0),y=ray(0,dy);return dist(p,x)>dist(p,y)?x:y;
  }
  const NPCS={moss:{name:'苔米',form:'sprout',body:'#82956b',accent:'#ead7ad',intro:'住在桥那头，爱记下叶子的变化。'},chestnut:{name:'阿栗',form:'fox',body:'#b88159',accent:'#ecd9b3',intro:'照看杂货铺，偶尔带着点心去河边歇脚。'}};
  function npc(s,id,at,weatherAt,hourAt){
@@ -81,5 +92,5 @@
   function stop(k){const time=k*period-offset,h=hourAt(s,time),wet=weatherAt(s,time)==='小雨',cycle=((k%4)+4)%4;if(id==='moss'){if(h<7||h>=21||wet)return{p:SPOTS.neighbor,task:wet?'在门廊整理叶片':'在家里休息',reason:wet?'下雨了，今天先在屋檐下整理植物札记。':'夜深了，明天再去看花。'};if(s.discoveries.some(d=>d.createdAt<=time)&&cycle===2)return{p:SPOTS.dream,task:'看梦种花圃',reason:'花圃里长出了你们照料的植物，想来看看它的叶子。'};return[{p:SPOTS.neighbor,task:'整理植物札记',reason:'想把观察记下来。'},{p:SPOTS.farm,task:'看看河畔的幼苗',reason:'记过的叶形，想和田里的幼苗比一比。'},{p:SPOTS.bench,task:'在树下读几页',reason:'散步之后，在长椅边翻翻札记。'},{p:SPOTS.shop,task:'找阿栗聊种子',reason:'想打听下一季的种子。'}][cycle];}if(h<7||h>=22||wet)return{p:SPOTS.shop,task:wet?'把货筐收进屋檐':'收拾杂货铺',reason:wet?'雨会打湿种子袋，先把货筐收好。':'把货架整理好，再歇一会儿。'};return[{p:SPOTS.shop,task:'整理种子和渔具',reason:'店里的种子袋需要分好。'},{p:SPOTS.shop,task:'在店前晒晒太阳',reason:'刚整理完，站在门口看看路过的人。'},{p:SPOTS.fishing,task:'去河边透透气',reason:'带着点心，去水边歇一会儿。'},{p:SPOTS.bench,task:'坐在树下歇脚',reason:'回店前想听一阵鸟叫。'}][cycle];}
   const prev=stop(slot-1),next=stop(slot),key=id+':'+slot+':'+prev.p.name+':'+next.p.name;let points=cache.get(key);if(!points){points=route(prev.p,next.p);cache.set(key,points);if(cache.size>30)cache.delete(cache.keys().next().value);}const ms=Math.max(1,distance(points)/72*1000+400),pos=interpolate({points,startedAt:start,endsAt:start+ms},at);return{...NPCS[id],id,...pos,task:pos.moving?'正要'+next.task:next.task,reason:next.reason};
  }
- return{WIDTH,HEIGHT,SPEED,CELL,HOME,DOOR,SPOTS,PROPS,PLOTS,paths,NPCS,point,dist,walkable,nearest,lineClear,localRoute,route,distance,interpolate,destination,fresh,position,settle,begin,clean,npc};
+ return{steer,WIDTH,HEIGHT,SPEED,CELL,HOME,DOOR,SPOTS,PROPS,PLOTS,paths,NPCS,point,dist,walkable,nearest,lineClear,localRoute,route,distance,interpolate,destination,fresh,position,settle,begin,clean,npc};
 });

@@ -13,14 +13,14 @@
   function finish(){if(done()&&!s.celebrated){s.celebrated=true;options.onFinish?.(s.kind,clone(s));save();}}
   function choose(i){if(!active||busy||done()||(!link&&!s.movesLeft)||s.board[i]<=0)return;
    if(selected===i){selected=-1;hinted=[];render();return;}if(selected<0){selected=i;hinted=[];render();return;}
-   if(link){const path=A.removeLink(s,selected,i);if(path){selected=-1;hinted=[];let mixed=false;if(!done()&&!A.linkHint(s)){mixed=A.shuffleLink(s,true);}save();render();if(s.flow==='still')flash(path);message.textContent=mixed?'「这份摆法没有路了，已用一次重排重新摆好，图案都还在。」':'「这两个碰面啦。」';}else{selected=i;render();message.textContent='这条路还连不上，试试从边缘绕过去。';}}
+   if(link){const path=A.removeLink(s,selected,i);if(path){selected=-1;hinted=[];let mixed=false;if(!done()&&!A.linkHint(s)){mixed=A.shuffleLink(s,true);}save();render();if(s.flow==='still')flash(path);message.textContent=mixed?'「这份摆法没有路了，已用一次重排重新摆好，图案都还在。」':'消掉一对';}else{selected=i;render();message.textContent='这条路还连不上，试试从边缘绕过去。';}}
    else{const previous=selected,result=A.swapMatch(s,selected,i);selected=-1;hinted=[];if(!result.valid){selected=i;render();message.textContent='要交换相邻的两颗，并且凑成三个才行。这次没有扣步数。';return;}
     save();busy=true;const first=result.waves[0];render(first.board,new Set(first.removed));message.textContent='「'+(result.chain>1?'连消 '+result.chain+' 次！':'消掉啦！')+(result.bonus?'四颗或更多连在一起，多送 '+result.bonus+' 步。':'')+'」'+(result.created?' 留下一颗'+(['','横线魔法','竖线魔法','彩色星星'][result.created])+'。':'')+(result.shuffled?'没有可交换的组合，已经重新摆好。':'');timer=setTimeout(()=>{if(!active)return;busy=false;render();},matchMedia('(prefers-reduced-motion: reduce)').matches?0:260);
    }
   }
-  const hint=btn('伙伴给点提示',()=>{if(busy||done()||link&&!A.canHelp(s))return;const h=link?A.linkHint(s):A.matchHint(s);if(!h){message.textContent='换个摆法再看看吧。';return;}s.helps++;hinted=[h.a,h.b];selected=-1;save();render();if(link)flash(h.path,3500);message.textContent=link?'「看看这两个，我把路线画给你。」':'「试试交换亮起来的这两个。」';board.children[h.a].scrollIntoView({block:'center',behavior:'instant'});});
+  const hint=btn('伙伴给点提示',()=>{if(busy||done()||link&&!A.canHelp(s))return;const h=link?A.linkHint(s):A.matchHint(s);if(!h){message.textContent='换个摆法再看看吧。';return;}s.helps++;hinted=[h.a,h.b];selected=-1;save();render();if(link)flash(h.path,3500);message.textContent=link?'「看看这两个，我把路线画给你。」':'「试试交换亮起来的这两个。」';});
   const shuffle=btn('换个摆法',()=>{if(busy||done()||link&&!A.canHelp(s))return;link?A.shuffleLink(s):A.shuffleMatch(s);selected=-1;hinted=[];save();render();message.textContent='「重新摆好了，慢慢来。」';});
-  tools.append(btn('放大棋盘',()=>{wrap.classList.toggle('zoomed');}),btn('柔和配色',()=>{wrap.classList.toggle('quiet-colors');}),hint,shuffle,btn('重玩这一关',()=>confirm('重新开始第 '+s.level+' 关？这一关的当前棋盘会收起，关卡册里的成绩会保留。',()=>options.onLevel?.(s.level))),btn('关卡册',()=>options.onBook?.()),btn('先收好',()=>options.onExit?.()));
+  tools.append(hint,shuffle,btn('重玩这一关',()=>confirm('重新开始第 '+s.level+' 关？这一关的当前棋盘会收起，关卡册里的成绩会保留。',()=>options.onLevel?.(s.level))),btn('关卡册',()=>options.onBook?.()),btn('先收好',()=>options.onExit?.()));
   function render(display=s.board,removed=new Set()){
    if(!active)return;const win=done(),lose=!link&&!win&&s.movesLeft===0;
    progress.textContent=link?`第 ${s.level} / ${A.LINK_LEVELS} 关 · ${config.chapter} · 剩 ${s.board.filter(v=>v>0).length/2} 对`:`第 ${s.level} / ${A.MATCH_LEVELS} 关 · ${s.score} / ${config.target} 分 · 剩 ${s.movesLeft} 步`+(config.collect?` · ${A.NAMES[config.collect.symbol-1]} ${s.collected[config.collect.symbol-1]} / ${config.collect.count}`:'');

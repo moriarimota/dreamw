@@ -1,4 +1,4 @@
-/* 那边的小日子 — local, finite life rules. No network or model calls. */
+/* 那边的生活 — local, finite life rules. No network or model calls. */
 (function (root, factory) {
   const api = factory(root.WitchGames || (typeof require === 'function' ? require('./games.js') : null));
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -25,7 +25,7 @@
       ['给云烤面包', '云喜欢刚出炉的面包，但讨厌留下脚印。于是面包房的烟囱每天都会冒出一小串香气。'],
       ['蘑菇的时钟', '蘑菇煮熟之前会敲三下锅盖。没有敲的时候，可能只是它忘了数到几。'],
       ['晚餐客人', '她多摆了一只杯子。月亮路过窗前时，轻轻往杯子里添了一点光。'],
-      ['留下最后一口', '食谱在最后一页写着：剩下一口，不是为了节省。是让明天知道，昨天还挺好。']
+      ['留下最后一口', '食谱在最后一页写着：留下的一口甜饼，明早配热茶刚刚好。']
     ] },
     { id: 'stars', title: '小星星的野外观察', chapters: [
       ['辨认星迹', '星星落到地上会变得很小，通常和石子一样大。最可靠的辨认办法，是看看它有没有在偷偷打哈欠。'],
@@ -178,6 +178,7 @@
   function next(s, now) {
     const committedIndex = s.queue.findIndex(a => (a.kind === 'craft' || a.studyFragmentId) && (!a.knowledgeFragmentId || s.knowledge.some(k => k.key === 'seed:' + a.knowledgeFragmentId)) && (!a.plantFragmentId || s.knowledge.some(k => k.key === 'seed:' + a.plantFragmentId)));
     if (committedIndex >= 0) { const a = s.queue.splice(committedIndex, 1)[0]; start(s, a, now); fillQueue(s); return; }
+    if(s.activity.userInitiated&&H.ids.includes(s.activity.kind)&&s.hobbies.projects[s.activity.kind].stage>0){const a={...H.spec(s,s.activity.kind),durationMs:MINUTE,userInitiated:true,decision:{reason:'刚才一起完成了一步，接着把这件手作做完。',reasons:['继续你们一起开始的手作'],candidates:[],sourceIds:[s.activity.id]}};start(s,a,now);fillQueue(s);return;}
     if (restore(s, now)) return;
     const a = plan(s, s.activity.kind, now);
     start(s, a, now); fillQueue(s);
@@ -294,7 +295,7 @@
     const initial = { ...spec(s, 'read'), durationMs: 3 * HOUR, bookId: 'moss', title: '在读《苔藓邮差的旅行簿》', decision: { reason: '她想慢慢读完这本书，在你来之前已经读了一会儿', reasons: ['她喜欢读书', '这本旅行簿还没有读完'], candidates: scores(s, now), sourceIds: [] } };
     start(s, initial, Math.max(0, now - 37 * MINUTE)); fillQueue(s);
     if(V)s.village=V.fresh(s.activity);
-    remember(s, 'hello', '她给你留了一个位置。你忙的时候，她会继续自己的小日子。', now, 'meeting');
+    remember(s, 'hello', '她给你留了一个位置。你忙的时候，她会继续自己的生活。', now, 'meeting');
     return s;
   }
   function advance(s, now) {
@@ -411,7 +412,7 @@
   function countryAction(s,kind,data,now){if(s.activity.kind==='game')holdGame(s,now);else advance(s,now);const message=E.action(s,kind,data||{},s.lastAdvancedAt);event(s,'country:'+id(s,'care'),'country',message,s.lastAdvancedAt,[]);if(kind==='harvest'&&s.country.harvests===1)remember(s,'country:garden:first',message,s.lastAdvancedAt,'discovery');if(s.country.session?.stage==='caught'&&s.country.caught[s.country.session.species]===1)remember(s,'country:fish:'+s.country.session.species,message,s.lastAdvancedAt,'discovery');fillQueue(s);return message;}
   function setProfile(s,data){const keep=s.avatar.kind==='original'&&data.form==='original',p=C.proposal({...data,form:keep?'sprout':data.form}),avatar=C.clean(data.portrait?{...p.avatar,kind:'portrait',portrait:data.portrait}:keep?{...s.avatar,bio:p.avatar.bio}:p.avatar);const preferences={...s.preferences,name:p.name,...p.personality};if(new TextEncoder().encode(JSON.stringify({...s,preferences,avatar})).length>LIMITS.fileBytes)throw Error('这张图片让存档超过容量，请换一张更小的角色图片');s.preferences=preferences;s.avatar=avatar;}
   function setClockOffset(s,offset,now){number(offset,-840,840,'时区');if(!Number.isInteger(offset))throw Error('时区无效');advance(s,now);s.preferences.utcOffsetMinutes=offset;updateWorld(s,s.lastAdvancedAt);}
-  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):kind==='link'?A.isLinkDone(b):kind==='match3'?A.isMatchDone(b):['go','xiangqi'].includes(kind)?!!b.winner:false;if(!done)throw Error('这一局还没完成');if(kind==='link'){const table=b.mode==='legacy'?s.arcadeProgress.link:(s.arcadeProgress.linkVariants[b.mode+'-'+b.flow]||=Array(36).fill(0));table[b.level-1]=Math.max(table[b.level-1],Math.max(1,3-Math.min(2,b.helps)));}if(kind==='match3'){const table=b.mode==='classic'?s.arcadeProgress.match3:(s.arcadeProgress.matchVariants[b.mode]||=Array(20).fill(0));table[b.level-1]=Math.max(table[b.level-1],b.score);}const names={go:'一起下完了一盘围棋练习',xiangqi:'一起下完了一盘象棋练习',link:'一起玩过连连看的第 '+b.level+' 关',match3:'一起玩过消消乐的第 '+b.level+' 关',sudoku:'解开了伙伴出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
+  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):kind==='link'?A.isLinkDone(b):kind==='match3'?A.isMatchDone(b):kind==='nonogram'?b.cells.every((v,i)=>(v===1)===(b.solution[i]===1)):kind==='merge'?b.won:['go','xiangqi'].includes(kind)?!!b.winner:false;if(!done)throw Error('这一局还没完成');if(kind==='link'){const table=b.mode==='legacy'?s.arcadeProgress.link:(s.arcadeProgress.linkVariants[b.mode+'-'+b.flow]||=Array(36).fill(0));table[b.level-1]=Math.max(table[b.level-1],Math.max(1,3-Math.min(2,b.helps)));}if(kind==='match3'){const table=b.mode==='classic'?s.arcadeProgress.match3:(s.arcadeProgress.matchVariants[b.mode]||=Array(20).fill(0));table[b.level-1]=Math.max(table[b.level-1],b.score);}const names={nonogram:'一起完成了一张 '+b.size+' × '+b.size+' 数织小图',merge:'一起把星砂合成了 2048',go:'一起下完了一盘围棋练习',xiangqi:'一起下完了一盘象棋练习',link:'一起玩过连连看的第 '+b.level+' 关',match3:'一起玩过消消乐的第 '+b.level+' 关',sudoku:'解开了伙伴出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
   function holdGame(s, now) {
     now = Math.max(time(now === undefined ? Date.now() : now), s.lastAdvancedAt);
     if (s.activity.kind !== 'game') return advance(s, now);
