@@ -6,6 +6,11 @@ from urllib.parse import urlsplit, unquote
 ROOT = Path(__file__).resolve().parent.parent
 
 class Handler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # A detached Windows process can inherit an unread stderr pipe. Avoid
+        # blocking asset responses on request logging during browser tests.
+        pass
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
