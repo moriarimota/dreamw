@@ -3,13 +3,14 @@ from pathlib import Path
 import json, sys, zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-GAME = ['arcade-plus.js', 'board-games.js', 'board-games-ui.js', 'country.js', 'companions.js', 'expedition-ui.js', 'expansion.css'] + ['tokens.js','arcade.js','arcade-ui.js','arcade.css','hobbies.js','games.js', 'games-ui.js', 'games.css', 'scenes.js', 'scenes.css'] + ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
-ASSETS = ['riverbank-v1.png','courtyard-v1.png','cottage-empty-v1.png','witch-walk-v1.png','dream-props-v1.png']
-TEXT = ['design/riverbank-v1-prompt.md','README.md','AGENTS.md','.gitignore','启动说明.md','.github/workflows/pages.yml']
+GAME = ['terrain.js', 'pocket-games.js', 'pocket-ui.js', 'postcards.js', 'offline.js', 'offline-worker.js', 'offline-manifest.js', 'details.css'] + ['play-layout.js','polish-init.js','polish.css'] + ['village.js','village-view.js','village.css','vendor/phaser-3.90.0.min.js','vendor/phaser-LICENSE.txt'] + ['arcade-plus.js', 'board-games.js', 'board-games-ui.js', 'country.js', 'companions.js', 'expedition-ui.js', 'expansion.css'] + ['tokens.js','arcade.js','arcade-ui.js','arcade.css','hobbies.js','games.js', 'games-ui.js', 'games.css', 'scenes.js', 'scenes.css'] + ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
+ICONS = ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png']
+ASSETS = ['terrain-v2.png', 'village-props-v1.png','witch-directions-v1.png','village-actions-v1.png','cottage-map-v1.png','riverbank-v1.png','courtyard-v1.png','cottage-empty-v1.png','witch-walk-v1.png','dream-props-v1.png']
+TEXT = ['design/terrain-v2-prompt.md','design/v6-asset-prompts.md','design/riverbank-v1-prompt.md','README.md','AGENTS.md','.gitignore','启动说明.md','.github/workflows/pages.yml']
 TEXT += ['game/'+f for f in GAME]
 TEXT += ['desktop/'+f for f in ['Launcher.cs','build.ps1','smoke.ps1','README.md']]
-TEXT += ['tools/'+f for f in ['package.ps1','prepare-release.py']]
-TEXT += ['tests/'+f for f in ['v5-tests.js','v5-ui.html','arcade-tests.js','arcade-ui.html','expansion-tests.js','expansion-ui.html','life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
+TEXT += ['tools/'+f for f in ['verify-v7-runtime.js','package.ps1','prepare-release.py','check-v61-release.py','check-js-v61.js']]
+TEXT += ['tests/'+f for f in ['map-preview.html','v7-tests.js','offline-tests.js','v7-ui.html','v61-tests.js','v61-ui.html','gait-preview.html','v6-tests.js','v6-ui.html','v5-tests.js','v5-ui.html','arcade-tests.js','arcade-ui.html','expansion-tests.js','expansion-ui.html','life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
 TEXT += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'docs').rglob('*.md'))]
 
 def safe(relative):
@@ -25,8 +26,8 @@ if '--tree' in sys.argv:
     print(json.dumps([{'path':f,'mode':'100644','type':'blob','content':safe(f).read_text(encoding='utf-8-sig')} for f in TEXT],ensure_ascii=True))
 else:
     release=ROOT/'releases'; release.mkdir(exist_ok=True)
-    web=[('game/'+f,f) for f in GAME]+[('game/assets/'+f,'assets/'+f) for f in ASSETS]
-    source=[(f,'WitchLife/'+f) for f in TEXT]+[('game/assets/'+f,'WitchLife/game/assets/'+f) for f in ASSETS]
+    web=[('game/'+f,f) for f in GAME+ICONS]+[('game/assets/'+f,'assets/'+f) for f in ASSETS]
+    source=[(f,'WitchLife/'+f) for f in TEXT]+[('game/'+f,'WitchLife/game/'+f) for f in ICONS]+[('game/assets/'+f,'WitchLife/game/assets/'+f) for f in ASSETS]
     version=sys.argv[1] if len(sys.argv)>1 else 'demo-v2'
     if not version.replace('-','').replace('.','').isalnum(): raise ValueError('Invalid version')
     for label,entries in [('web',web),('source',source)]:
