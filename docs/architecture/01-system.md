@@ -85,3 +85,11 @@ village-view.js在运行时提取身体和双腿，按实际移动距离驱动�
 `hobbies.js` 在三步完成时根据开工 context/sourceIds 与原始梦种生成 letter 快照；`postcards.js` 只呈现、标已读和本机下载图片。`village-view.js` 的笔尖/蒸汽/翻页/呼吸没有写世界状态。
 
 `sw.js` 导入 `offline-worker.js` 与明确 `offline-manifest.js`；`offline.js` 注册、核验、申请存储与先保存后更新。网页仍无后台服务器，原生 iOS/云同步未实现。
+
+## v0.8 四季生活模块
+
+seasons.js维护40作物/24鱼的内容及季节、熟练度、出没条件；country.js执行农事和钓鱼。kitchen.js维护40食谱和12工作，检查库存、开工扣料、完工入餐篮；life.js负责统一时间和中断，不允许界面直接发食物/报酬。library.js提供27本新书，与旧3本合并；life-ui.js呈现厨房、自由阅读和委托。field-ui.js呈现触摸田格、批量商店和图鉴。
+
+letters.js选择已发生事件/梦种并固化来源，hobbies.js保持三步草稿，postcards.js只绘制与导出。festival-games.js为12种新增游戏的纯规则，festival-ui.js为输入/渲染，统一接入playbox。横版60Hz离散物理、最多18000帧，保存压缩输入并回放校验；飞行棋由独立种子决定骰子。
+
+第三块forest区域1536×1152，入口与街区相连，12位居民按日程移动；terrain.js只绘制场地，不改变碰撞事实。所有自主选择继续保留开工时因果理由。地图点田经步行抵达，调用同一农事入口。

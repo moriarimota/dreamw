@@ -3,14 +3,14 @@ from pathlib import Path
 import json, sys, zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-GAME = ['terrain.js', 'pocket-games.js', 'pocket-ui.js', 'postcards.js', 'offline.js', 'offline-worker.js', 'offline-manifest.js', 'details.css'] + ['play-layout.js','polish-init.js','polish.css'] + ['village.js','village-view.js','village.css','vendor/phaser-3.90.0.min.js','vendor/phaser-LICENSE.txt'] + ['arcade-plus.js', 'board-games.js', 'board-games-ui.js', 'country.js', 'companions.js', 'expedition-ui.js', 'expansion.css'] + ['tokens.js','arcade.js','arcade-ui.js','arcade.css','hobbies.js','games.js', 'games-ui.js', 'games.css', 'scenes.js', 'scenes.css'] + ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
+GAME = ['kitchen.js', 'library.js', 'life-ui.js'] + ['seasons.js', 'letters.js', 'festival-games.js', 'festival-ui.js', 'field-ui.js', 'seasons.css'] + ['terrain.js', 'pocket-games.js', 'pocket-ui.js', 'postcards.js', 'offline.js', 'offline-worker.js', 'offline-manifest.js', 'details.css'] + ['play-layout.js','polish-init.js','polish.css'] + ['village.js','village-view.js','village.css','vendor/phaser-3.90.0.min.js','vendor/phaser-LICENSE.txt'] + ['arcade-plus.js', 'board-games.js', 'board-games-ui.js', 'country.js', 'companions.js', 'expedition-ui.js', 'expansion.css'] + ['tokens.js','arcade.js','arcade-ui.js','arcade.css','hobbies.js','games.js', 'games-ui.js', 'games.css', 'scenes.js', 'scenes.css'] + ['index.html','style.css','app.js','navigation.js','life.js','storage.js','gomoku.js','sw.js','icon.svg','manifest.webmanifest','.nojekyll']
 ICONS = ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png']
 ASSETS = ['terrain-v2.png', 'village-props-v1.png','witch-directions-v1.png','village-actions-v1.png','cottage-map-v1.png','riverbank-v1.png','courtyard-v1.png','cottage-empty-v1.png','witch-walk-v1.png','dream-props-v1.png']
 TEXT = ['design/terrain-v2-prompt.md','design/v6-asset-prompts.md','design/riverbank-v1-prompt.md','README.md','AGENTS.md','.gitignore','启动说明.md','.github/workflows/pages.yml']
 TEXT += ['game/'+f for f in GAME]
 TEXT += ['desktop/'+f for f in ['Launcher.cs','build.ps1','smoke.ps1','README.md']]
 TEXT += ['tools/'+f for f in ['verify-v7-runtime.js','package.ps1','prepare-release.py','check-v61-release.py','check-js-v61.js']]
-TEXT += ['tests/'+f for f in ['map-preview.html','v7-tests.js','offline-tests.js','v7-ui.html','v61-tests.js','v61-ui.html','gait-preview.html','v6-tests.js','v6-ui.html','v5-tests.js','v5-ui.html','arcade-tests.js','arcade-ui.html','expansion-tests.js','expansion-ui.html','life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
+TEXT += ['tests/'+f for f in ['v8-tests.js','v8-content-tests.js','v8-ui.html','v8-capture.js','map-preview.html','v7-tests.js','offline-tests.js','v7-ui.html','v61-tests.js','v61-ui.html','gait-preview.html','v6-tests.js','v6-ui.html','v5-tests.js','v5-ui.html','arcade-tests.js','arcade-ui.html','expansion-tests.js','expansion-ui.html','life-tests.js','life-tests.html','storage-tests.js','gomoku-tests.html','ui-smoke.html','serve-tests.py']]
 TEXT += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'docs').rglob('*.md'))]
 
 def safe(relative):

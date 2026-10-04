@@ -1,4 +1,7 @@
-# 梦乡 · 口袋生活 Demo v0.7.1
+# 梦乡 · 四季生活 v0.8
+
+本地新版已完成；公开手机网址的实际版本请看 [当前状态](docs/STATUS.md)。本轮新增40作物与40食谱的种植—厨房—商店链，24鱼/图鉴、12居民/委托、30本书和22种小游戏。设计规则见 [四季生活](docs/design/12-seasons-v8.md)，验收见 [检查记录](docs/development/07-v8-verification.md)。
+
 
 一个魔女在另一个世界生活，你在人间的日常可以成为她世界里的梦种。你有空时随时加入，忙的时候，她继续自己的计划。
 
@@ -12,8 +15,8 @@
 
 双击根目录 `启动梦乡.exe`。无需安装Python、Node或游戏引擎。启动器使用Windows现有的Edge/Chrome打开独立游戏窗口；托盘菜单可重新打开或退出。若没有可用的独立窗口浏览器，会提示回退行为。
 
-1. 点击地面行走，点击物件走近后互动；电脑也支持WASD/方向键。“地图”可以去田边、钓台、商店或找苔米与阿栗，跟随/全景/远近控制镜头。
-2. “一起待会儿→玩会儿游戏”有十种选择，包含新数织与星砂合成；“她的兴趣手册”能查看六项三步小计划，加入她的生活。
+1. 点击地面行走，点击物件走近后互动；电脑也支持WASD/方向键。“地图”可以去田边、钓台、商店、萤光林地或找12位居民，跟随/全景/远近控制镜头。
+2. “一起待会儿→玩会儿游戏”有22种选择，包含飞行棋、横版远足、数织与星砂合成；“她的兴趣手册”能查看六项三步小计划，加入她的生活。
 3. “留颗梦种”记录一小段日常或梦，查看她的想法，再决定是否一起做。
 4. 梦种研究/制作在Demo中各约45秒；植物还会长大、引来便笺。
 5. “小小收藏”查看原文、实体物品、共同经历、知识与明信片信匣。
@@ -25,7 +28,7 @@
 
 桌面存档：`user-data/state.json`，上一份：`user-data/state.previous.json`。专用浏览器资料也在user-data里。复制游戏文件夹时保留这个目录；发布代码时必须排除。
 
-网页使用同一份game文件，支持本地存档和缓存。跨设备目前用导出JSON→另一设备导入，两端独立保存。EXE是Windows入口；iPhone通过Safari添加到主屏幕。v0.7.1已部署并确认53项离线素材完整；安装步骤见 docs/development/05-iphone-offline.md，发布回执见 docs/STATUS.md。
+网页使用同一份game文件，支持本地存档和缓存。跨设备目前用导出JSON→另一设备导入，两端独立保存。EXE是Windows入口；iPhone通过Safari添加到主屏幕。本地v0.8包含62项离线素材；公开网址实际部署版本见STATUS。安装步骤见 docs/development/05-iphone-offline.md，发布回执见 docs/STATUS.md。
 
 ## 技术栈与目录
 
@@ -41,7 +44,13 @@ WitchLife/
     hobbies.js         六项持续兴趣、材料与成果
     arcade.js/arcade-plus.js 经典棋盘与多难度、移动/魔法规则
     board-games.js/board-games-ui.js 围棋、象棋、入门教学
+    seasons.js         40作物/24鱼、四季与熟练度
     country.js         田地、渔具、钓鱼、商店与物资规则
+    kitchen.js         40食谱、餐篮与12位居民工作
+    library.js         27本新增原创小书，与旧3本合并
+    field-ui.js/life-ui.js 触摸田地、商店图鉴、厨房书架与委托
+    festival-games.js/festival-ui.js 12种新增小游戏规则与界面
+    letters.js/postcards.js 真实生活信文来源与插画
     companions.js      实例角色、外形/图片/AI设定校验
     expedition-ui.js   河畔与角色创建界面
     arcade-ui.js        消除游戏界面与关卡衔接

@@ -7,6 +7,7 @@
   'use strict';
   const H=globalThis.WitchHobbies||(typeof require==='function'?require('./hobbies.js'):null), A=globalThis.WitchArcade||(typeof require==='function'?require('./arcade.js'):null);
   const E=globalThis.WitchCountry||(typeof require==='function'?require('./country.js'):null), C=globalThis.WitchCompanions||(typeof require==='function'?require('./companions.js'):null);
+  const K=globalThis.WitchKitchen||(typeof require==='function'?require('./kitchen.js'):null),Library=globalThis.WitchLibrary||(typeof require==='function'?require('./library.js'):null);
   const V=globalThis.WitchVillage||(typeof require==='function'?require('./village.js'):null);
   const MINUTE = 60000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
   const LIMITS = Object.freeze({ text: 600, fragments: 240, creations: 120, memories: 80, fileBytes: 1500000 });
@@ -36,7 +37,13 @@
       ['观察者的注记', '所有记录后面都留一页空白。明天遇见的东西，不一定愿意照着今天的名字生长。']
     ] }
   ];
+  BOOKS.push(...Library.BOOKS);
   const ACTIVITIES = {
+    recipe:{title:"在厨房准备一餐",place:"fire",detail:"把自己的收获洗净，按食谱慢慢料理。",durations:[12,18]},
+    forage:{title:'到林间找些草叶',place:'forestForage',detail:'沿着蕨叶小径看看，带一点香草回家。',durations:[18,25,35]},
+    sketch:{title:'在树梢下画一张速写',place:'forestView',detail:'看看这一季的叶色，画下眼前的池塘和树影。',durations:[20,30]},
+    help:{title:'帮灰团整理手作棚',place:'forestStudio',detail:'帮忙整理木盒、种子袋和画纸，完成后收到一份星砂谢礼。',durations:[15,22]},
+    deliver:{title:'替邻居送一封信',place:'forestCamp',detail:'把小纸信带到营地，再沿林间小路散散步。',durations:[12,20]},
     walk: {title:'陪你在街区走一会儿',place:'gardenPath',detail:'沿路慢慢走，到地方后停一会儿，再接着原来的计划。',durations:[1]},
     garden: {title:'去河畔照料小田',place:'riverFarm',detail:'看看哪块地该种下种子、添一点水，或收下成熟的作物。',durations:[12,18,25]},
     fish: {title:'带着鱼竿去河边',place:'riverJetty',detail:'鱼饵放进了小罐，去木栈桥安静等一条鱼。',durations:[20,30,40]},
@@ -57,14 +64,14 @@
   };
   for(const k of H.ids){const d=H.PROJECTS[k];ACTIVITIES[k]={title:d.name,detail:d.steps[0][2],place:d.steps[0][1],durations:[25,40,20]};}
   const WEATHER = ['晴朗', '薄云', '小雨', '雨后'];
-  const ENERGY_RATE = { garden:-9, fish:-5, market:-3, read: -3, research: -9, craft: -10, tea: 12, rest: 24, break: 6, game: -4, cook:-6, tidy:-10, gather:-12, birdwatch:8, stargaze:4, picnic:15 };
+  const ENERGY_RATE = {recipe:-4,forage:-8,sketch:3,help:-8,deliver:-5, garden:-9, fish:-5, market:-3, read: -3, research: -9, craft: -10, tea: 12, rest: 24, break: 6, game: -4, cook:-6, tidy:-10, gather:-12, birdwatch:8, stargaze:4, picnic:15 };
   for(const k of H.ids)ENERGY_RATE[k]=-7;
   function hourAt(s, at) { return Math.floor(((at + (s.preferences.utcOffsetMinutes === undefined ? 480 : s.preferences.utcOffsetMinutes) * MINUTE) % DAY + DAY) % DAY / HOUR); }
   function weatherAt(s, at) { return WEATHER[hash(String(s.createdAt) + ':' + Math.floor(at / (6 * HOUR))) % WEATHER.length]; }
   function updateWorld(s, at) {
     s.world.weather = weatherAt(s, at);
     s.world.day = Math.floor((at + (s.preferences.utcOffsetMinutes === undefined ? 480 : s.preferences.utcOffsetMinutes) * MINUTE) / DAY);
-    s.world.hour = hourAt(s, at);
+    s.world.hour = hourAt(s, at);s.world.season=E.season(s,at);
     if (s.activity) s.world.energy = Math.max(5, Math.min(100, (s.activity.energyAtStart === undefined ? 76 : s.activity.energyAtStart) + Math.max(0, at - s.activity.startedAt) / HOUR * (ENERGY_RATE[s.activity.kind] || 0)));
     s.world.lastUpdatedAt = at;
   }
@@ -102,7 +109,11 @@
       {kind:'market',score:13+p.curiosity*10,eligible:hour>=8&&hour<21&&energy>=25,reasons:['想去河边看看种子与鱼竿，想买的东西先记住']},
       {kind:'fish',score:20+p.quiet*15+(weather==='小雨'?-10:0),eligible:!!s.country.rod&&s.country.bait>0&&energy>=25&&!['waiting','hooked'].includes(s.country.session?.stage),reasons:[!s.country.rod?'还没有鱼竿，可以在河畔商店买到':!s.country.bait?'鱼饵用完了，先准备鱼饵':'已经有鱼竿和鱼饵，可以去木栈桥试试',...(weather==='小雨'?['雨天可能遇到喜欢雨水的鱼']:[])]}
     ];
-    rows.push(...H.rows(s,at));
+    rows.push(...H.rows(s,at));rows.push({kind:'recipe',score:20+(s.world.energy<50?12:0),eligible:hour>=7&&hour<22&&Object.keys(K.RECIPES).some(id=>K.available(s,id)),reasons:['餐篮里可以添一道新菜，现有的食材已经够了']});
+    rows.push({kind:'forage',score:19+p.curiosity*12,eligible:hour>=7&&hour<20&&energy>25&&weather!=='小雨',reasons:['林间有草叶可以采，想换条路散步']},
+    {kind:'sketch',score:14+p.quiet*12,eligible:hour>=7&&hour<20&&weather!=='小雨',reasons:['想把这一季的叶色画下来']},
+    {kind:'help',score:14+(s.country.coins<20?16:0),eligible:hour>=8&&hour<20&&energy>30&&at-s.country.lastJobAt>=3*HOUR,reasons:[s.country.coins<20?'想买新种子，去手作棚帮一会儿忙':'灰团的手作棚有一些整理工作']},
+    {kind:'deliver',score:12+p.curiosity*10,eligible:hour>=8&&hour<20&&weather!=='小雨'&&energy>25&&at-s.country.lastJobAt>=3*HOUR,reasons:['顺路把邻居的小纸信带到营地']});
     for (const row of rows) { if (row.kind === previous) { row.score *= .3; row.reasons.push('刚做过，暂时更想换件事'); } row.score = Math.round(row.score); row.reason = row.reasons.join('；'); }
     return rows;
   }
@@ -128,6 +139,9 @@
     if(H.ids.includes(kind))return H.spec(s,kind);
     const d = ACTIVITIES[kind];
     const a = { kind, title: d.title, detail: d.detail, place: d.place, durationMs: d.durations[Math.floor(random(s) * d.durations.length)] * MINUTE };
+    if(kind==='recipe'){const choices=Object.keys(K.RECIPES).filter(id=>K.available(s,id));a.recipeId=choices[Math.floor(random(s)*choices.length)]||'herbtea';a.portions=1;const d=K.RECIPES[a.recipeId];a.title='做一份'+d.name;a.detail=d.description;a.durationMs=d.minutes*MINUTE;}
+    if(kind==='help'){const choices=Object.keys(K.JOBS).filter(id=>s.world.lastUpdatedAt-s.kitchen.jobAt[id]>=3*HOUR);a.jobId=choices[Math.floor(random(s)*choices.length)]||'ember';const j=K.JOBS[a.jobId];a.title='帮'+V.NPCS[a.jobId].name+j.name;a.detail='完成后收到 '+j.pay+' 星砂谢礼。';a.place=j.place;a.durationMs=j.minutes*MINUTE;}
+    if(kind==='fish'&&s.country.fishingPlace==='pond')a.place='forestPond';
     if(kind==='garden'){a.gardenJob=E.task(s,s.world.lastUpdatedAt);if(a.gardenJob){a.title=({plant:'种下一颗',water:'给幼苗添水 · ',harvest:'收下成熟的'})[a.gardenJob.type]+E.CROPS[a.gardenJob.crop].name;a.detail='第 '+(a.gardenJob.plot+1)+' 块田地：'+a.title+'。种子、雨水和之前的照料会留下真实的进度。';}}
     if (kind === 'read') {
       const candidates = BOOKS.filter(b => b.id !== s.lastBookId);
@@ -146,6 +160,7 @@
     s.queue = committed.concat(rows.slice(0, 3).map(c => ({ kind: c.kind, title: ACTIVITIES[c.kind].title, detail: ACTIVITIES[c.kind].detail, place: ACTIVITIES[c.kind].place, durationMs: ACTIVITIES[c.kind].durations[0] * MINUTE, ...(c.kind === 'read' ? { bookId: 'moss' } : {}), tentative: true }))).slice(0, 12);
   }
   function start(s, a, now) {
+    if(a.kind==='recipe')K.begin(s,a);
     if(a.kind==='fish')a.fishSpecies=E.beginAutoFish(s,now);
     if (a.kind === 'cook') { if (!a.material) a.material = s.home.pantry.herbs ? 'herbs' : 'berries'; if (!s.home.pantry[a.material]) throw new Error('先去小院采一点材料吧'); s.home.pantry[a.material]--; }
     if (a.kind === 'picnic') { if (!s.home.pantry.snacks) throw new Error('先在炉边做一点茶点吧'); s.home.pantry.snacks--; }
@@ -186,6 +201,8 @@
   function finish(s, at) {
     const a = s.activity;
     const h = s.home;
+    if(a.kind==='recipe'){const result=K.finish(s,a);event(s,'result:'+a.id,'daily',result,at,[a.id]);remember(s,'recipe:'+a.recipeId,result,at,'together');}
+    if(['forage','sketch','help','deliver'].includes(a.kind)){let result='';if(a.kind==='forage'){h.pantry.herbs=Math.min(24,h.pantry.herbs+2);result='她从林间带回了两份香草，叶子上还留着露水。';}if(a.kind==='sketch')result='她在树梢观景处画了一张速写，把这一季的树影和池塘收进画纸。';if(a.kind==='help'||a.kind==='deliver'){const job=K.JOBS[a.jobId||'ember'],reward=a.kind==='help'?job.pay:8;if(a.kind==='help'){s.kitchen.jobDone[a.jobId||'ember']=Math.min(1000000,s.kitchen.jobDone[a.jobId||'ember']+1);s.kitchen.jobAt[a.jobId||'ember']=at;}s.country.coins=Math.min(1000000,s.country.coins+reward);s.country.jobs++;s.country.lastJobAt=at;result=a.kind==='help'?'她帮'+V.NPCS[a.jobId||'ember'].name+'完成了'+job.name+'，收下 '+job.pay+' 星砂谢礼。':'她把邻居的小纸信送到营地，收到 8 星砂和一声谢谢。';}event(s,'result:'+a.id,'daily',result,at,[a.id]);remember(s,'first:'+a.kind,result,at,'together');}
     if(['garden','fish','market'].includes(a.kind)){const result=a.kind==='garden'?E.finishGarden(s,a,at):a.kind==='fish'?E.finishAutoFish(s,a.fishSpecies):E.action(s,'visit',{},at);if(result){event(s,'result:'+a.id,'country',result,at,[a.id]);if((a.kind==='garden'&&s.country.harvests===1)||(a.kind==='fish'&&s.country.caught[a.fishSpecies]===1)){remember(s,'country:'+a.kind+':'+(a.fishSpecies||'first'),result,at,'discovery');learn(s,'country:'+a.kind+':'+(a.fishSpecies||'first'),result,at,[a.id]);}}}
     if(H.ids.includes(a.kind)){const outcome=H.finish(s,a,at,id(s,'keepsake'));if(outcome){event(s,'result:'+a.id,'hobby',outcome.text,at,outcome.sources);if(outcome.done){remember(s,'hobby:'+outcome.work.id,outcome.text,at,'creation');learn(s,'hobby:'+a.kind,'学会了'+H.PROJECTS[a.kind].name+'：'+H.PROJECTS[a.kind].steps.map(v=>v[0]).join(' → ')+'。',at,outcome.sources);}}}
     if (['cook','tidy','gather','birdwatch','stargaze','picnic'].includes(a.kind)) {
@@ -287,7 +304,7 @@
   }
   function create(now) {
     now = time(now === undefined ? Date.now() : now);
-    const s = { version: 6, country:E.fresh(), avatar:C.fresh(), learning:{go:0}, hobbies:H.fresh(), arcadeProgress:A.cleanProgress(null), home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
+    const s = { version: 7, kitchen:K.fresh(), country:E.fresh(), avatar:C.fresh(), learning:{go:0}, hobbies:H.fresh(), arcadeProgress:A.cleanProgress(null), home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
       activity: null, queue: [], paused: [], books: BOOKS.map(b => ({ id: b.id, readCount: 0, lastReadAt: null })),
       fragments: [], creations: [], memories: [], preferences: { name: '新伙伴', curiosity: .78, bookish: .7, quiet: .62, utcOffsetMinutes:480 }, board: null, position: { x: 480, y: 895 }, lastBookId: null,
       world: { weather: '薄云', energy: 78, day: 0, hour: 0, lastUpdatedAt: now }, knowledge: [], events: [], plants: [], discoveries: [] };
@@ -358,10 +375,10 @@
   }
   function invite(s,kind,options,now) {
     options=options||{};advance(s,now);now=s.lastAdvancedAt;
-    if(!['read','tea','break','rest','cook','tidy','gather','birdwatch','stargaze','picnic','garden','fish','market',...H.ids].includes(kind))throw Error('这件事还没准备好');
+    if(!['read','tea','break','rest','cook','tidy','gather','birdwatch','stargaze','picnic','garden','fish','market','forage','sketch','help','deliver','recipe',...H.ids].includes(kind))throw Error('这件事还没准备好');
     if(H.ids.includes(kind)){if(stateProjectResume(s,kind,now))return s.activity;if(!H.available(s,kind))throw Error('先去小院采一份'+(H.PROJECTS[kind].cost==='herbs'?'香草':'浆果')+'吧');}
-    const row=scores(s,now).find(c=>c.kind===kind);if(row&&!row.eligible)throw Error(kind==='stargaze'?'等夜色来了、雨停了，再一起看星星吧':kind==='picnic'?'白天不下雨时，带一份茶点再去野餐吧':'现在有点晚或有些累，先歇歇再来吧');
-    const a=spec(s,kind);a.userInitiated=true;
+    const row=scores(s,now).find(c=>c.kind===kind);if(row&&!row.eligible&&!(kind==='recipe'&&options.recipeId)&&!(kind==='help'&&options.jobId&&s.world.hour>=8&&s.world.hour<20&&s.world.energy>30))throw Error(kind==='stargaze'?'等夜色来了、雨停了，再一起看星星吧':kind==='picnic'?'白天不下雨时，带一份茶点再去野餐吧':'现在有点晚或有些累，先歇歇再来吧');
+    const a=spec(s,kind);a.userInitiated=true;if(kind==='recipe'){a.recipeId=allowed(options.recipeId||a.recipeId,Object.keys(K.RECIPES));a.portions=options.portions??1;if(!K.available(s,a.recipeId,a.portions))throw Error('食材不足，先看看食谱里缺少的材料。');const d=K.RECIPES[a.recipeId];a.title='一起做'+d.name;a.detail=d.description;a.durationMs=(60+a.portions*30)*1000;}if(kind==='help'){a.jobId=allowed(options.jobId||'ember',Object.keys(K.JOBS));const j=K.JOBS[a.jobId];if(now-s.kitchen.jobAt[a.jobId]<3*HOUR)throw Error('刚帮过这位邻居，过一会儿再来吧。');a.title='帮'+V.NPCS[a.jobId].name+j.name;a.detail='完成后收到 '+j.pay+' 星砂。';a.place=j.place;a.durationMs=j.minutes*MINUTE;}
     if(kind==='cook'||kind==='gather') {
       a.material=allowed(options.material||a.material,['herbs','berries']);
       if(kind==='cook'&&!s.home.pantry[a.material])throw Error('这种材料用完啦，先去小院采一点');
@@ -380,7 +397,7 @@
     advance(s,now); now=s.lastAdvancedAt;
     if(!V||!s.village)throw Error('地图还没有准备好');
     const p=typeof target==='string'?V.SPOTS[target]:target;
-    if(!p||!['inside','village'].includes(p.area)||!Number.isFinite(p.x)||!Number.isFinite(p.y))throw Error('没有这个目的地');
+    if(!p||!['inside','village','forest'].includes(p.area)||!Number.isFinite(p.x)||!Number.isFinite(p.y))throw Error('没有这个目的地');
     const destination=V.nearest(p); V.route(V.position(s,now),destination);
     if(s.activity.kind==='walk'){s.activity.destination=destination;s.activity.title=p.name?'去'+p.name:'陪你沿小路走走';const travel=V.begin(s,s.activity,now);s.activity.startedAt=now+travel;s.activity.endsAt=s.activity.startedAt+s.activity.durationMs;s.activity.progressBase=0;s.activity.energyAtStart=s.world.energy;return s.activity;}
     if(s.activity.kind!=='walk')pause(s,now);
@@ -391,7 +408,7 @@
   function neighborAction(s,npcId,action,now){
     advance(s,now);now=s.lastAdvancedAt;const n=residents(s,now).find(n=>n.id===npcId);
     if(!n)throw Error('这位邻居还没搬来');
-    if(V.dist(V.position(s,now),n)>180)throw Error(n.name+'正去了别处，走近一点再聊吧。');
+    if(V.position(s,now).area!==n.area||V.dist(V.position(s,now),n)>180)throw Error(n.name+'正去了别处，走近一点再聊吧。');
     const c=s.village.contacts[npcId];let text='',key=null,sources=[];
     if(action==='talk'){c.talks=Math.min(1000000,c.talks+1);if(!c.met){c.met=true;key='neighbor:met:'+npcId;text='认识了'+n.name+'。'+n.intro;}else text=n.name+'：'+n.reason;}
     else if(action==='borrow'){if(npcId!=='moss')throw Error('这位邻居没有这本书');if(c.borrowed)throw Error('苔米的书已经借过了。');c.met=true;c.borrowed=true;c.readBefore=s.books.find(b=>b.id==='stars').readCount;text='苔米借给你们一本《小星星的野外观察》，请你们留意附页的梦种植物。';key='neighbor:borrow';}
@@ -400,6 +417,7 @@
     else throw Error('还没有这种互动');
     if(key){event(s,key,'neighbor',text,now,sources);remember(s,key,text,now,'neighbor');}return text;
   }
+  function kitchenAction(s,kind,recipe,quantity,now){advance(s,now);const text=K.action(s,kind,recipe,quantity);event(s,'kitchen:'+id(s,'meal'),'daily',text,s.lastAdvancedAt,[]);return text;}
   function homeAction(s,kind,now) {
     advance(s,now);const h=s.home;let message;
     if(kind==='lamp'){h.lamp=!h.lamp;message=h.lamp?'小灯亮起来了。':'把小灯调暗，留一点安静。';}
@@ -412,7 +430,7 @@
   function countryAction(s,kind,data,now){if(s.activity.kind==='game')holdGame(s,now);else advance(s,now);const message=E.action(s,kind,data||{},s.lastAdvancedAt);event(s,'country:'+id(s,'care'),'country',message,s.lastAdvancedAt,[]);if(kind==='harvest'&&s.country.harvests===1)remember(s,'country:garden:first',message,s.lastAdvancedAt,'discovery');if(s.country.session?.stage==='caught'&&s.country.caught[s.country.session.species]===1)remember(s,'country:fish:'+s.country.session.species,message,s.lastAdvancedAt,'discovery');fillQueue(s);return message;}
   function setProfile(s,data){const keep=s.avatar.kind==='original'&&data.form==='original',p=C.proposal({...data,form:keep?'sprout':data.form}),avatar=C.clean(data.portrait?{...p.avatar,kind:'portrait',portrait:data.portrait}:keep?{...s.avatar,bio:p.avatar.bio}:p.avatar);const preferences={...s.preferences,name:p.name,...p.personality};if(new TextEncoder().encode(JSON.stringify({...s,preferences,avatar})).length>LIMITS.fileBytes)throw Error('这张图片让存档超过容量，请换一张更小的角色图片');s.preferences=preferences;s.avatar=avatar;}
   function setClockOffset(s,offset,now){number(offset,-840,840,'时区');if(!Number.isInteger(offset))throw Error('时区无效');advance(s,now);s.preferences.utcOffsetMinutes=offset;updateWorld(s,s.lastAdvancedAt);}
-  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):kind==='link'?A.isLinkDone(b):kind==='match3'?A.isMatchDone(b):kind==='nonogram'?b.cells.every((v,i)=>(v===1)===(b.solution[i]===1)):kind==='merge'?b.won:['go','xiangqi'].includes(kind)?!!b.winner:false;if(!done)throw Error('这一局还没完成');if(kind==='link'){const table=b.mode==='legacy'?s.arcadeProgress.link:(s.arcadeProgress.linkVariants[b.mode+'-'+b.flow]||=Array(36).fill(0));table[b.level-1]=Math.max(table[b.level-1],Math.max(1,3-Math.min(2,b.helps)));}if(kind==='match3'){const table=b.mode==='classic'?s.arcadeProgress.match3:(s.arcadeProgress.matchVariants[b.mode]||=Array(20).fill(0));table[b.level-1]=Math.max(table[b.level-1],b.score);}const names={nonogram:'一起完成了一张 '+b.size+' × '+b.size+' 数织小图',merge:'一起把星砂合成了 2048',go:'一起下完了一盘围棋练习',xiangqi:'一起下完了一盘象棋练习',link:'一起玩过连连看的第 '+b.level+' 关',match3:'一起玩过消消乐的第 '+b.level+' 关',sudoku:'解开了伙伴出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
+  function recordMiniGame(s,kind,value,now){const b=G.cleanBox({[kind]:value})[kind];const done=globalThis.WitchFestival?.ids.includes(kind)?b.over:kind==='sudoku'?G.isSudokuDone(b):kind==='puzzle'?G.isPuzzleDone(b):kind==='pairs'?G.isPairsDone(b):kind==='link'?A.isLinkDone(b):kind==='match3'?A.isMatchDone(b):kind==='nonogram'?b.cells.every((v,i)=>(v===1)===(b.solution[i]===1)):kind==='merge'?b.won:['go','xiangqi'].includes(kind)?!!b.winner:false;if(!done)throw Error('这一局还没完成');if(kind==='link'){const table=b.mode==='legacy'?s.arcadeProgress.link:(s.arcadeProgress.linkVariants[b.mode+'-'+b.flow]||=Array(36).fill(0));table[b.level-1]=Math.max(table[b.level-1],Math.max(1,3-Math.min(2,b.helps)));}if(kind==='match3'){const table=b.mode==='classic'?s.arcadeProgress.match3:(s.arcadeProgress.matchVariants[b.mode]||=Array(20).fill(0));table[b.level-1]=Math.max(table[b.level-1],b.score);}const names={...Object.fromEntries((globalThis.WitchFestival?.ids||[]).map(k=>[k,'一起玩完了'+globalThis.WitchFestival.CATALOG[k][0]+'第 '+b.level+' 档'])),nonogram:'一起完成了一张 '+b.size+' × '+b.size+' 数织小图',merge:'一起把星砂合成了 2048',go:'一起下完了一盘围棋练习',xiangqi:'一起下完了一盘象棋练习',link:'一起玩过连连看的第 '+b.level+' 关',match3:'一起玩过消消乐的第 '+b.level+' 关',sudoku:'解开了伙伴出的数独',puzzle:'拼好了你们小世界的一张照片',pairs:'一起找齐了星月记忆牌'};remember(s,b.id,names[kind]+'。她把这段一起玩的时间收好了。',time(now),'together');}
   function holdGame(s, now) {
     now = Math.max(time(now === undefined ? Date.now() : now), s.lastAdvancedAt);
     if (s.activity.kind !== 'game') return advance(s, now);
@@ -528,18 +546,18 @@
 
   function validate(value, now) {
     now = time(now === undefined ? Date.now() : now);
-    if (!value || typeof value !== 'object' || ![2,3,4,5,6].includes(value.version)) throw new Error('这不是当前版本的游戏存档');
+    if (!value || typeof value !== 'object' || ![2,3,4,5,6,7].includes(value.version)) throw new Error('这不是当前版本的游戏存档');
     // Only whitelisted fields are copied; never merge imported objects into prototypes.
     const serial = number(value.serial, 0, 1000000000, '序号');
-    const s = { version: 6, country:E.clean(value.country), avatar:C.clean(value.version<5?null:value.avatar,value.version<5), learning:{go:number(value.learning?.go||0,0,6,'教学进度')}, hobbies:H.clean(value.hobbies), arcadeProgress:A.cleanProgress(value.arcadeProgress), home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
+    const s = { version: 7, kitchen:K.clean(value.kitchen), country:E.clean(value.country), avatar:C.clean(value.version<5?null:value.avatar,value.version<5), learning:{go:number(value.learning?.go||0,0,6,'教学进度')}, hobbies:H.clean(value.hobbies), arcadeProgress:A.cleanProgress(value.arcadeProgress), home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
       activity: cleanActivity(value.activity), queue: list(value.queue, 12).map(a => cleanActivity(a, true)), paused: list(value.paused, 8).map(a => cleanActivity(a)),
       books: [], fragments: [], creations: [], memories: [], preferences: { utcOffsetMinutes: value.preferences && value.preferences.utcOffsetMinutes !== undefined ? number(value.preferences.utcOffsetMinutes,-840,840,'时区') : 480, name: cleanText(value.preferences && value.preferences.name || '小罗', 30), curiosity: number(value.preferences && value.preferences.curiosity === undefined ? .78 : value.preferences.curiosity, 0, 1, '性格'), bookish: number(value.preferences && value.preferences.bookish === undefined ? .7 : value.preferences.bookish, 0, 1, '性格'), quiet: number(value.preferences && value.preferences.quiet === undefined ? .62 : value.preferences.quiet, 0, 1, '性格') }, board: cleanBoard(value.board),
       position: { x: number(value.position && value.position.x, 0, 941, '位置'), y: number(value.position && value.position.y, 0, 1672, '位置') }, lastBookId: BOOKS.some(b => b.id === value.lastBookId) ? value.lastBookId : null,
       world: { weather: '薄云', energy: value.world ? number(value.world.energy, 0, 100, '精神') : 76, day: 0, hour: 0, lastUpdatedAt: stamp(value.lastAdvancedAt) }, knowledge: [], events: [], plants: [], discoveries: [] };
     if(!Number.isInteger(s.learning.go))throw Error('教学进度必须是完整页数');
-    if(V)s.village=V.clean(value.version===6?value.village:null,s.activity);
+    if(V)s.village=V.clean(value.version>=6?value.village:null,s.activity);
     if (s.lastAdvancedAt > now + DAY) throw new Error('存档时间远晚于当前设备时间，请检查设备时钟');
-    const bookValues = list(value.books, 3);
+    const bookValues = list(value.books, 30);
     s.books = BOOKS.map(b => { const v = bookValues.find(v => v.id === b.id); return { id: b.id, readCount: v ? number(v.readCount, 0, 1000000, '阅读次数') : 0, lastReadAt: v && v.lastReadAt !== null ? stamp(v.lastReadAt) : null }; });
     s.fragments = list(value.fragments, LIMITS.fragments).map(f => ({ id: ident(f.id), text: cleanText(f.text, LIMITS.text), createdAt: stamp(f.createdAt),
       tags: cleanTags(f.tags), proposal: cleanProposal(f.proposal), status: allowed(f.status, ['pending', 'deferred', 'making', 'queued', 'made', 'accepted', 'studying']), isDreamSeed: f.isDreamSeed === true,
@@ -572,8 +590,9 @@
     const hobbyActivities=[s.activity,...s.paused].filter(a=>H.ids.includes(a.kind));
     if(new Set(hobbyActivities.map(a=>a.kind)).size!==hobbyActivities.length)throw Error('兴趣计划重复进行');
     for(const a of hobbyActivities){const p=s.hobbies.projects[a.kind];if(!p.paid||a.projectStage!==p.stage||a.projectEdition!==p.editions+1)throw Error('兴趣计划与进度不一致');}
-    for(const w of s.hobbies.works)if(w.sourceIds.some(id=>!fids.has(id)))throw Error('兴趣作品缺少梦种来历');
-    for(const k of H.ids)if(s.hobbies.projects[k].sourceIds.some(id=>!fids.has(id)))throw Error('兴趣计划缺少梦种来历');
+    function letterSource(id,source){if(fids.has(id))return true;if(!/^event-\d+$/.test(id)||source?.sourceType!=='life')return false;const text=source.sourceFact??source.sourceText;if(!text||source.sourceAt>s.lastAdvancedAt)return false;const e=s.events.find(e=>e.id===id);return !e||(e.text===text&&e.at===source.sourceAt);}
+    for(const w of s.hobbies.works)if(w.sourceIds.some(id=>!letterSource(id,w.letter)))throw Error('兴趣作品缺少生活或梦种来历');
+    for(const k of H.ids){const p=s.hobbies.projects[k];if(p.sourceIds.some(id=>!letterSource(id,p.draft)))throw Error('兴趣计划缺少生活或梦种来历');if(p.draft?.sourceId&&!p.sourceIds.includes(p.draft.sourceId))throw Error('明信片草稿与来历不一致');}
     // Sequence cannot be rolled back by a malformed import and collide with existing IDs.
     const ids = [...s.hobbies.works.map(w=>w.id),s.activity.id, ...s.paused.map(a => a.id), ...s.fragments.map(f => f.id), ...s.creations.map(c => c.id), ...s.memories.map(m => m.id), ...s.events.map(v => v.id), ...s.knowledge.map(v => v.id), ...s.plants.map(v => v.id), ...s.discoveries.map(v => v.id)];
     s.serial = Math.max(s.serial, ...ids.filter(Boolean).map(v => Number(v.split('-').pop()) || 0));
@@ -599,13 +618,14 @@
   function cleanActivity(a, queued) {
     if (!a || typeof a !== 'object') throw new Error('生活计划缺失');
     const kind = allowed(a.kind, Object.keys(ACTIVITIES));
-    const result = { kind, title: cleanText(a.title, 120), detail: cleanText(a.detail, 800), place: allowed(a.place, ['bed', 'fire', 'desk', 'rug', 'window', 'shelf', 'gardenPath', 'gardenBench','riverFarm','riverJetty','riverShop']), durationMs: number(a.durationMs, 1000, 12 * HOUR, '活动时长') };
+    const result = { kind, title: cleanText(a.title, 120), detail: cleanText(a.detail, 800), place: allowed(a.place, ['bed', 'fire', 'desk', 'rug', 'window', 'shelf', 'gardenPath', 'gardenBench','riverFarm','riverJetty','riverShop','forestForage','forestStudio','forestView','forestCamp','forestPond','riverNeighbor','villageCafe','villageBakery','villageLibrary','forestApiary','forestOrchard','forestTea']), durationMs: number(a.durationMs, 1000, 12 * HOUR, '活动时长') };
     if (!queued) {
       result.id = ident(a.id); result.startedAt = stamp(a.startedAt); result.endsAt = stamp(a.endsAt); result.progressBase = number(a.progressBase || 0, 0, 1, '活动进度');
       if (result.endsAt <= result.startedAt || result.endsAt - result.startedAt > result.durationMs + 1) throw new Error('活动时间不合理');
     }
     if(H.ids.includes(kind)&&!a.tentative){result.projectStage=number(a.projectStage,0,2,'兴趣步骤');result.projectEdition=number(a.projectEdition,1,1000000,'兴趣作品');if(!Number.isInteger(result.projectStage)||!Number.isInteger(result.projectEdition))throw Error('兴趣步骤不正确');}
-    if(a.gardenJob)result.gardenJob={type:allowed(a.gardenJob.type,['plant','water','harvest']),plot:number(a.gardenJob.plot,0,5,'田地'),crop:allowed(a.gardenJob.crop,Object.keys(E.CROPS))};
+    if(kind==='recipe'&&!a.tentative){result.recipeId=allowed(a.recipeId,Object.keys(K.RECIPES));result.portions=number(a.portions,1,5,'烹饪份数');if(!Number.isInteger(result.portions))throw Error('份数须为整数');}if(a.jobId)result.jobId=allowed(a.jobId,Object.keys(K.JOBS));
+    if(a.gardenJob)result.gardenJob={type:allowed(a.gardenJob.type,['plant','water','harvest']),plot:number(a.gardenJob.plot,0,11,'田地'),crop:allowed(a.gardenJob.crop,Object.keys(E.CROPS))};
     if(result.gardenJob&&!Number.isInteger(result.gardenJob.plot))throw Error('田地编号必须是整数');
     if(kind==='fish'&&!a.tentative)result.fishSpecies=allowed(a.fishSpecies,Object.keys(E.FISH));
     if (a.material) result.material=allowed(a.material,['herbs','berries']);
@@ -616,10 +636,10 @@
     if (a.knowledgeFragmentId) result.knowledgeFragmentId = ident(a.knowledgeFragmentId);
     if (a.energyAtStart !== undefined) result.energyAtStart = number(a.energyAtStart, 0, 100, '精神');
     if (a.tentative === true) result.tentative = true;
-    if (a.decision) result.decision = { reason: cleanText(a.decision.reason, 600), reasons: list(a.decision.reasons, 8).map(v => cleanText(v, 300)), candidates: list(a.decision.candidates || [], 32).map(c => ({ kind: cleanText(c.kind, 20), score: number(c.score, 0, 1000), eligible: c.eligible === true, reasons: list(c.reasons || [], 8).map(v => cleanText(v, 300)), reason: cleanText(c.reason || '', 600) })), sourceIds: list(a.decision.sourceIds || [], 8).map(ident) };
+    if (a.decision) result.decision = { reason: cleanText(a.decision.reason, 600), reasons: list(a.decision.reasons, 8).map(v => cleanText(v, 300)), candidates: list(a.decision.candidates || [], 40).map(c => ({ kind: cleanText(c.kind, 20), score: number(c.score, 0, 1000), eligible: c.eligible === true, reasons: list(c.reasons || [], 8).map(v => cleanText(v, 300)), reason: cleanText(c.reason || '', 600) })), sourceIds: list(a.decision.sourceIds || [], 8).map(ident) };
     if(a.decision?.kind)result.decision.kind=allowed(a.decision.kind,Object.keys(ACTIVITIES));
     if (a.userInitiated === true) result.userInitiated = true;
-    if(a.destination){if(kind!=='walk')throw Error('这种活动不能指定散步位置');const d=a.destination;result.destination={area:allowed(d.area,['inside','village']),x:number(d.x,0,2048,'目的地'),y:number(d.y,0,1440,'目的地')};if(V&&!V.walkable(d.area,d.x,d.y))throw Error('目的地不可行走');}
+    if(a.destination){if(kind!=='walk')throw Error('这种活动不能指定散步位置');const d=a.destination;result.destination={area:allowed(d.area,['inside','village','forest']),x:number(d.x,0,2048,'目的地'),y:number(d.y,0,1440,'目的地')};if(V&&!V.walkable(d.area,d.x,d.y))throw Error('目的地不可行走');}
     return result;
   }
   function cleanBoard(b) {
@@ -631,5 +651,5 @@
     return result;
   }
   function exportState(s) { return JSON.stringify({ ...s, exportedAt: Date.now() }, null, 2); }
-  return { create, advance, walkTo, residents, neighborAction, countryAction, setProfile, focusHobby, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
+  return { kitchenAction, create, advance, walkTo, residents, neighborAction, countryAction, setProfile, focusHobby, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
 });

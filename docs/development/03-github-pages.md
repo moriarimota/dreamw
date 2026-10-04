@@ -4,7 +4,7 @@
 
 ## 发布方式
 
-`.github/workflows/pages.yml`从main构建，仅将game运行白名单复制到发布目录。首次部署成功（run 35585269815）。正式入口：[那边的小日子](https://moriarimota.github.io/dreamw/)。桌面存档、浏览器资料、原始手绘参考及日志不进入发布包。
+`.github/workflows/pages.yml`从main构建，仅将game运行白名单复制到发布目录。首次部署成功（run 35585269815）。正式入口：[梦乡](https://moriarimota.github.io/dreamw/)。桌面存档、浏览器资料、原始手绘参考及日志不进入发布包。
 
 GitHub保存代码并提供静态游戏文件；日常由浏览器中的世界规则计算，玩家存档保存在设备中。它不会成为私密云数据库或AI后端。无需为了此版单独购买服务器。
 
@@ -21,3 +21,6 @@ Safari网页、主屏幕Web App与其他浏览器可能具有不同的存储环�
 `tools/package.ps1`打包Windows便携版；`tools/prepare-release.py`打包纯网页与源码。均使用明确文件清单，排除user-data。
 
 参考：[GitHub发布源说明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)、[Apple主屏幕入口说明](https://support.apple.com/en-nz/guide/iphone/iph42ab2f3a7/ios)。
+
+
+v0.6将village.js、village-view.js、village.css、vendor中的Phaser及MIT许可、四张地图/动作素材加入白名单；index与sw使用0.6.0资源参数。所有资源仍由同一Pages来源提供。

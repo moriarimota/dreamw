@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $fixture = Join-Path $PSScriptRoot ('smoke-fixture-' + [Guid]::NewGuid().ToString('N'))
 $fixture = [System.IO.Path]::GetFullPath($fixture)
@@ -61,7 +61,7 @@ function Check([string] $name, [bool] $passed) {
 
 try {
     [void][System.IO.Directory]::CreateDirectory((Join-Path $fixture 'game'))
-    Copy-Item -LiteralPath (Join-Path $projectRoot '启动那边的小日子.exe') -Destination $fixtureExe
+    Copy-Item -LiteralPath (Join-Path $projectRoot '启动梦乡.exe') -Destination $fixtureExe
     [System.IO.File]::WriteAllText((Join-Path $fixture 'game/index.html'), '<!doctype html><title>Launcher test</title>', $utf8)
     [System.IO.File]::WriteAllText((Join-Path $fixture 'game/asset.js'), 'window.launcherTest=true;', $utf8)
     [System.IO.File]::WriteAllText((Join-Path $fixture 'game/private.log'), 'not served', $utf8)

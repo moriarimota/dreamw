@@ -9,7 +9,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\WitchLife\desktop\bui
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\WitchLife\desktop\smoke.ps1
 ```
 
-The script execution policy above applies to that PowerShell process only. The build writes `../启动那边的小日子.exe`. The smoke script creates a temporary isolated fixture under this directory, tests it on port 18765, stops its processes, and removes the fixture. It never changes production `user-data`. Do not run smoke tests while the actual game server is using port 18765. Results are recorded in `smoke-results.json`.
+The script execution policy above applies to that PowerShell process only. The build writes `../启动梦乡.exe`. The smoke script creates a temporary isolated fixture under this directory, tests it on port 18765, stops its processes, and removes the fixture. It never changes production `user-data`. Do not run smoke tests while the actual game server is using port 18765. Results are recorded in `smoke-results.json`.
 
 ## Runtime and lifecycle
 
