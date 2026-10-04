@@ -22,6 +22,8 @@ jobs:
       - name: Stage only the playable game
         run: |
           mkdir -p public/assets public/vendor
+          cp game/seasons.js game/letters.js game/festival-games.js game/festival-ui.js game/field-ui.js game/seasons.css public/
+          cp game/kitchen.js game/library.js game/life-ui.js public/
           cp game/pocket-games.js game/pocket-ui.js game/postcards.js game/offline.js game/offline-worker.js game/offline-manifest.js game/details.css game/icon-192.png game/icon-512.png game/apple-touch-icon.png public/
           cp game/play-layout.js game/polish-init.js game/polish.css public/
           cp game/terrain.js game/village.js game/village-view.js game/village.css public/

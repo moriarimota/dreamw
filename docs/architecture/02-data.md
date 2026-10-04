@@ -75,3 +75,13 @@ NPC当前位置从时间和日程推导；发现事实只有createdAt不晚于�
 `playbox.nonogram` / `playbox.merge` 缺省为 null。数织从 seed/size 重建题面并核验 fixed cells 和撤销记录；合成从 seed/moves 重播，棋盘或分数不符时拒绝。
 
 明信片手作可有 `letter: {from,heading,body,theme,sourceQuote}` 和 `read`。旧明信片不补编信文。letter 文字长度受限，DOM 使用 textContent；postcard sourceIds 与三个步骤 ID 保持原结构。其他手作不添加 read 字段，确保正常存档往返稳定。
+
+## v7 世界迁移（内容版本v0.8）
+
+外层version=7，旧存储键不变，storage首次升级保留before-v7备份。country.version=2：plots总12、unlocked初6，40种seeds/bag/harvested、24种fish/caught/best、farmingXp/fishingXp、hemisphere、fishingPlace、jobs/lastJobAt。缺少旧图鉴字段补0，不推测不存在的收获。旧6块田按原次序迁移。
+
+kitchen保存40种meals/cooked、eaten、12位居民jobDone/jobAt。activity.recipeId/portions与jobId经枚举和整数校验，暂停栈一起保留；食材已在start扣除，resume不能重扣。books补齐至30，原ID和读书次数保持。village.version=2补12居民contacts与forest区域，不改已有角色。
+
+playbox新增festival-games的12个独立槽，保存kind/seed/level/moves及规范状态；导入重放并比较所有字段，限制4000个动作、横版18000帧。拼图接受13个图ID和3–6边长。
+
+postcard draft/letter记录sourceType、sourceAt、sourceFact或sourceQuote、theme、variant；生活来源为真实事件id，当前事件仍在时校验一致，历史滚出容量后保留来源快照。项目完工清除草稿与临时来源，成品保留完整引用。

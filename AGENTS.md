@@ -45,3 +45,10 @@
 - 入口离线清单改动时检查 `tools/verify-v7-runtime.js`；未来每次发布须同步 index 资源版本与 offline-manifest.version，防止同版本混装。
 - 新规则：`tests/v7-tests.js`；离线网络失败回归：`tests/offline-tests.js`；实际触摸：`tests/v7-ui.html`。浏览器超时不等于验收通过。
 - 不把 PWA 描述成 IPA 或后台持续执行；不把本地文件与未部署的公网混为一谈。明信片文案保持来源与长度约束，不自动传出梦种。
+
+## v0.8 四季生活约定
+
+- 内容表：seasons.js、kitchen.js、library.js；新想法先核对design/12-seasons-v8.md。不要让UI直接改库存或发报酬。
+- 买种、播种、收获、厨房与售卖共享真实库存；开工扣料，完工入账，中断恢复不可重复扣料。旧6田和旧书目ID必须保留。
+- 验证：tests/v8-tests.js、v8-content-tests.js、v8-ui.html。测试捕获脚本仅由隔离夹具载入，不加入游戏发布清单。
+- 发布只同步明确清单，实际部署状态写STATUS。书籍、图鉴、居民与游戏数量必须来自实际内容；不得把程序生成的重复内容描述为无限新玩法。

@@ -80,7 +80,7 @@ namespace WitchLifeDesktop
             catch (Exception ex)
             {
                 Log(ex);
-                if (!headless) MessageBox.Show(ex.Message, "那边的小日子", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!headless) MessageBox.Show(ex.Message, "梦乡", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return 1;
             }
         }
@@ -142,12 +142,12 @@ namespace WitchLifeDesktop
                 Directory.CreateDirectory(cache);
                 Process.Start(new ProcessStartInfo(browser,
                     "--app=" + BaseUrl + "/ --user-data-dir=\"" + profile + "\" --disk-cache-dir=\"" + cache +
-                    "\" --no-first-run --no-default-browser-check --disable-background-mode")
+                    "\" --no-first-run --no-default-browser-check --disable-background-mode --window-size=1280,860")
                     { UseShellExecute = false, CreateNoWindow = true });
                 return;
             }
             MessageBox.Show("未找到 Edge 或 Chrome，将使用默认浏览器打开。游戏文件和桌面存档在游戏目录中；默认浏览器的缓存仍由它自己的设置决定，可能位于 C 盘。",
-                "那边的小日子", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                "梦乡", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Process.Start(new ProcessStartInfo(BaseUrl + "/") { UseShellExecute = true });
         }
 
@@ -168,16 +168,16 @@ namespace WitchLifeDesktop
         internal GameTray()
         {
             var menu = new ContextMenuStrip();
-            menu.Items.Add("打开那边的小日子", null, delegate { TryOpen(); });
+            menu.Items.Add("打开梦乡", null, delegate { TryOpen(); });
             menu.Items.Add("退出游戏服务", null, delegate { ExitThread(); });
-            icon = new NotifyIcon { Icon = SystemIcons.Application, Text = "那边的小日子 · 本机游戏服务", ContextMenuStrip = menu, Visible = true };
+            icon = new NotifyIcon { Icon = SystemIcons.Application, Text = "梦乡 · 本机游戏服务", ContextMenuStrip = menu, Visible = true };
             icon.DoubleClick += delegate { TryOpen(); };
-            icon.ShowBalloonTip(4000, "那边的小日子", "关闭窗口后可从这里重新打开；右键选择“退出游戏服务”可完全退出。", ToolTipIcon.Info);
+            icon.ShowBalloonTip(4000, "梦乡", "关闭窗口后可从这里重新打开；右键选择“退出游戏服务”可完全退出。", ToolTipIcon.Info);
         }
         private static void TryOpen()
         {
             try { Program.OpenGame(); }
-            catch (Exception ex) { Program.Log(ex); MessageBox.Show(ex.Message, "那边的小日子"); }
+            catch (Exception ex) { Program.Log(ex); MessageBox.Show(ex.Message, "梦乡"); }
         }
         protected override void Dispose(bool disposing)
         {

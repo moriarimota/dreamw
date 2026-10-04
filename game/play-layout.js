@@ -10,7 +10,7 @@
   const main=game.querySelector('.play-main'),side=game.querySelector('.play-tools'),w=sheet.clientWidth-32,h=content.clientHeight;
   const mobile=w<650;game.classList.toggle('play-narrow',mobile);
   const isXQ=!!board.querySelector('.xq-cell'),isPairs=board.classList.contains('pairs-board'),rows=isXQ?10:isPairs?4:1,cols=isXQ?9:isPairs?3:1;
-  let ratio=cols/rows;if(board.classList.contains('arcade-wrap')){const grid=board.querySelector('.arcade-board');const n=Number(grid.style.getPropertyValue('--cols'));ratio=n/Math.ceil(grid.children.length/n);}
+  let ratio=cols/rows;if(board.classList.contains('festival-board')){ratio=board.classList.contains('f-hanoi')?1.6:board.classList.contains('f-code')?1:Number(board.style.getPropertyValue('--cols'))/Number(board.style.getPropertyValue('--rows'));}if(board.classList.contains('arcade-wrap')){const grid=board.querySelector('.arcade-board');const n=Number(grid.style.getPropertyValue('--cols'));ratio=n/Math.ceil(grid.children.length/n);}
   const messages=[...main.children].filter(x=>x!==board),extra=messages.reduce((n,e)=>n+e.getBoundingClientRect().height+8,0);
   const sideH=mobile?Math.min(196,side.getBoundingClientRect().height):0;
   const size=Math.max(140,Math.min(mobile?w:w-224,(h-extra-sideH-20)*ratio,620));

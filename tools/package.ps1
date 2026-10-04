@@ -54,6 +54,17 @@ function Add-PackageFile {
 # This list is deliberately explicit. Do not replace it with a zip of the project
 # or game folder: both can contain personal saves, logs, and development fixtures.
 $requiredRuntimeFiles = @(
+    'game/kitchen.js',
+    'game/library.js',
+    'game/life-ui.js',
+
+    'game/seasons.js',
+    'game/letters.js',
+    'game/festival-games.js',
+    'game/festival-ui.js',
+    'game/field-ui.js',
+    'game/seasons.css',
+
     'game/terrain.js',
     'game/assets/terrain-v2.png',
     'game/pocket-games.js',
