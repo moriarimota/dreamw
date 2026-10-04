@@ -1,4 +1,4 @@
-# 梦乡 · 四季生活 v0.8
+# 梦乡 · 四季生活 v0.8.1
 
 本地新版已完成；公开手机网址的实际版本请看 [当前状态](docs/STATUS.md)。本轮新增40作物与40食谱的种植—厨房—商店链，24鱼/图鉴、12居民/委托、30本书和22种小游戏。设计规则见 [四季生活](docs/design/12-seasons-v8.md)，验收见 [检查记录](docs/development/07-v8-verification.md)。
 
@@ -28,7 +28,7 @@
 
 桌面存档：`user-data/state.json`，上一份：`user-data/state.previous.json`。专用浏览器资料也在user-data里。复制游戏文件夹时保留这个目录；发布代码时必须排除。
 
-网页使用同一份game文件，支持本地存档和缓存。跨设备目前用导出JSON→另一设备导入，两端独立保存。EXE是Windows入口；iPhone通过Safari添加到主屏幕。本地v0.8包含62项离线素材；公开网址实际部署版本见STATUS。安装步骤见 docs/development/05-iphone-offline.md，发布回执见 docs/STATUS.md。
+网页使用同一份game文件，支持本地存档和缓存。跨设备目前用导出JSON→另一设备导入，两端独立保存。EXE是Windows入口；iPhone通过Safari添加到主屏幕。v0.8.1已发布，包含62项离线素材；65个公开可请求文件与本地一致。旧安装入口可在设置点“检查游戏更新”。安装步骤见 docs/development/05-iphone-offline.md，发布回执见 docs/STATUS.md。
 
 ## 技术栈与目录
 

@@ -34,10 +34,19 @@
 
 打包使用 `tools/package.ps1` 和 `tools/prepare-release.py` 的白名单。不要复制整个项目、user-data、单次改写脚本或本地发布工作副本。
 
-发布状态以 [STATUS.md](../STATUS.md) 为准。GitHub 插件本轮返回授权过期，重新连接或使用已登录网页后才能完成发布；本地通过不等于手机网址已更新。
+发布状态以 [STATUS.md](../STATUS.md) 为准。2026-10-05认证恢复，已发布v0.8.1，实际回执见下文。
 
 ## 发布阻碍与本地分支
 
 2026-10-04：插件授权过期；非交互Git push dry-run报告没有Username凭据，未写远程。浏览器在本地19/19回归后，再次连接超时。已从公开main ab33aa1建立本地codex/four-season-life分支，工作副本为D:/WitchLife/releases/publish-v8-20261004；恢复认证后可继续上传。不要再次从旧代码分支覆盖main。
 
 最终运行资源号为0.8.1，避免本轮开发期间缓存过0.8.0的本地窗口继续使用中间素材。桌面、网页与源码包均以demo-v8.1-20261004为最终交付；较早v8/v8.0包是本轮构建快照。
+
+## 2026-10-05 公网发布回执
+
+- 认证账号moriarimota。上传67个变更文件；Git tree e70389146e0683cbdd9807d97c98baa09ed8f0b3 与本地验收提交完全相同。
+- PR #2：https://github.com/moriarimota/dreamw/pull/2 ，已合并。公开运行提交3280eae5e960271798ffa06c10e83dbaf53f815b。
+- Pages #7：https://github.com/moriarimota/dreamw/actions/runs/37216374759 ，completed / success。
+- tools/verify-live-v71.py依据当前离线清单动态检查：version 0.8.1，checked 65，differences []。报告在releases/live-v71-verification.json。
+- 公网浏览器预览打开超时；没有将这次预览写成界面或iPhone真机通过。前述19/19是发布前本地相同代码的UI验收。
+- 原网址继续使用。已安装PWA在设置检查游戏更新；保持联网完成62项离线素材缓存。私人存档未上传、未重置。

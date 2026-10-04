@@ -1,10 +1,12 @@
 # 当前项目状态
 
-版本：本地《梦乡》四季生活 v0.8.1，2026-10-04。本页是当前状态总表。
+版本：《梦乡》四季生活 v0.8.1，2026-10-05 已发布。本页是当前状态总表。
 
 ## 试玩与发布
 
-本地入口 `D:/WitchLife/启动梦乡.exe` 已使用本轮代码。手机/网页入口为 https://moriarimota.github.io/dreamw/ 。目前公开版本仍是 v0.7.1；v0.8.1 已完成本地规则与界面验收，待上传并验证部署。GitHub插件提示授权过期；Git命令行也没有可用登录凭据。浏览器测试中曾恢复，发布阶段再次无响应。不能把本地更新当成已发布。
+本地入口 `D:/WitchLife/启动梦乡.exe` 与手机/网页 https://moriarimota.github.io/dreamw/ 均为 v0.8.1。GitHub 连接恢复后，[PR #2](https://github.com/moriarimota/dreamw/pull/2) 已合并；[Pages #7](https://github.com/moriarimota/dreamw/actions/runs/37216374759) 成功。65 个公网可请求资源全部与本地一致（其中62项为离线清单资源）。旧安装入口联网后，在设置点“检查游戏更新”，等待“离线已就绪 · v0.8.1”。
+
+发布提交：3280eae5e960271798ffa06c10e83dbaf53f815b。此次公网浏览器预览超时；发布资源与本地已验收版本一致，iPhone真机仍由制作人试玩确认。
 
 ## 本轮可玩内容
 
