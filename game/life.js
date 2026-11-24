@@ -13,12 +13,12 @@
   const LIMITS = Object.freeze({ text: 600, fragments: 240, creations: 120, memories: 80, fileBytes: 1500000 });
   const BOOKS = [
     { id: 'moss', title: '苔藓邮差的旅行簿', chapters: [
-      ['没有地址的信', '苔藓邮差出门前，总要把口袋翻过来。漏掉的种子比漏掉的信更多，但他觉得这也算一种投递。'],
-      ['雨停以前', '渡口的屋檐住着一滴不肯落下的雨。邮差陪它等了半天，才知道它正在练习倒映月亮。'],
-      ['借来的鞋', '蜗牛借走了他的靴子，说要去很远的地方。第三天，邮差在门槛另一头看见了它。那确实是一次远行。'],
-      ['夜航灯', '河水把岸上的灯揉碎，又认真拼回去。邮差决定今晚不赶路了，他想看看拼错的那一盏。'],
-      ['一封空白信', '信里没有字，只有一片干燥的叶子。他把叶子泡在水里，整间屋子慢慢有了春天的气味。'],
-      ['明天的路', '他终于送完了最后一封信。回家路上，有人问明天还出门吗。邮差指了指鼓起来的种子口袋。']
+      ['没有地址的信', '苔藓邮差出门前，总要把口袋翻过来。桌上落下三颗草籽、一截红线，还有昨天没送出去的信。信封上没有街名，只写着：给愿意在雨停以前等一等的人。\n\n他把红线系在信角，免得它和普通信件混在一起。杂货铺的阿姨正往门口搬豆子，见他停下，便指指天：“肯等雨的人，今天可不难找。”他帮她把最后一袋豆子搬过门槛，袖口沾了一点面粉。阿姨要给他一块饼，他说留到回来吧，今天的路还不知道有多长。\n\n出了村口，口袋里的草籽漏在泥地上。他蹲下捡了两颗，第三颗已经藏进一道细缝。邮差把细缝旁的石子挪开，插了一根短枝作记号。他在旅行簿上画下这条岔路，又写：寄件人不详，收件人待找，途中种下一颗不知道名字的草。\n\n渡口传来收帆的声音。他摸了摸那封信，往有屋檐的方向走去。'],
+      ['雨停以前', '渡口的屋檐下挤着两个空木桶和一张窄凳。邮差坐下时，鞋尖正好碰到凳子下面的一只小碗。碗里没有水，只有一滴雨悬在它上方，圆圆的，迟迟不肯落下。\n\n“等谁呢？”邮差问。雨滴晃了晃，里面映出一弯小小的月亮。白天明明还没有过去，月亮却已经提前来屋檐里歇脚。雨滴说，它想练习把月亮倒映完整，每次快成的时候，风就会把边缘吹皱。邮差把湿帽子挂在风来的那一侧，自己挪到凳子的另一头。\n\n他们等到渡船靠岸，又等到船夫收好绳子。雨滴终于稳住了。它落进碗里，发出很轻的一声，月亮散成几片，又慢慢合在一起。邮差正要拿出信，碗边却爬出一只背着青色小壳的蜗牛。“这封信，”蜗牛看了看红线，“也许是给门槛那边的人。”\n\n邮差望向门槛另一头。那里不过几步远，但蜗牛已经认真地把触角转向了那边。'],
+      ['借来的鞋', '蜗牛借走了邮差的靴子，说要去很远的地方。邮差原以为它要把靴子穿在脚上，后来才发现，蜗牛把一只当成行李箱，另一只倒过来，当成路上避雨的小屋。\n\n第一天，它绕过了凳腿。第二天，它遇见一道比壳还宽的木纹，沿着纹路走了很久，才找到可以跨过去的地方。邮差白天照常送信，傍晚回来便在附近坐一坐。他没有替蜗牛搬行李，只把自己的水壶放在它够得着的地方。\n\n第三天，蜗牛到了门槛另一头。它打开行李箱，取出一张叠得很小的纸。纸上画着另一只蜗牛，旁边写：我以前住在这里，你来时可以看看我看过的河。邮差蹲下来，第一次从那么低的地方望出去。门槛遮住了道路，远处的河却正好从草叶之间露出来。\n\n“这是一次远行。”他说。蜗牛点点头。它把靴子还给他，又请他把那封系着红线的信带到河边。它今天已经走得够远，剩下的路，要明天才有力气继续。'],
+      ['夜航灯', '邮差沿河走到一座没有桥的小渡口。岸边有七盏灯，河里也有七盏。风过来时，河水把它们揉碎，又一片一片地拼回去。\n\n他数了三遍，总觉得其中一盏的位置不对。岸上最小的灯在最左边，水里最小的灯却躲在芦苇后面。他提着灯走近，才看见芦苇里拴着一只很旧的小船。船头的灯罩裂了一道缝，光就从那里漏下来，看着像多出的一盏。\n\n船夫正拿布擦干椅面。他说今夜没有乘客，但会等到对岸的灯熄了再回去，有时那边会有人来不及赶上最后一班。邮差摸摸信封，问他认不认识愿意等雨停的人。船夫笑了：“我每天都等，雨停了还得等人。可这封信上的红线，我没见过。”\n\n邮差帮他把裂开的灯罩转向背风处。两个人分了一块有点硬的饼，坐着看水面渐渐安静。对岸的灯亮了很久。他把旅行簿翻开，在渡口的图旁添上一只小船，决定今晚不赶路了。'],
+      ['一封空白信', '天快亮的时候，对岸来了一个提着空篮子的老婆婆。她过河去看一棵老树，树上的最后一片叶子落了，她便捡起来，夹在篮子的布衬里。\n\n船夫把小船推近岸边。老婆婆看见邮差信封上的红线，停了一下：“线是我系的。信里没有地址，因为写信时，我也不知道要寄给谁。”她说去年有人陪她在这座渡口等雨，临走前留下一只装热水的小瓶。她想道谢，却连那个人的名字也没有问。\n\n邮差打开信。里面没有字，只有一片干燥的叶子，和篮子里的那片长得很像。老婆婆把它放进热水里，叶脉慢慢舒展开，屋檐下有了一点青草和旧木头的气味。她给每个人倒了一杯，给那只仍在门槛边休息的蜗牛，也留了一滴。\n\n“那信算送到了吗？”船夫问。邮差看着空信封，想了一会儿，在旅行簿的收件人一栏写下：渡口今日在场的人。他没有盖上最后的印章，想等蜗牛醒来以后，再问问它的意见。'],
+      ['明天的路', '蜗牛醒来后，认真闻了那滴叶子水。它说这很像一个地方的气味，但它还没去过那个地方，所以暂时不能确定。邮差把这句话也记进旅行簿，才在信封背面盖上送达的印章。\n\n回村的路比来时干燥。杂货铺阿姨把留好的饼递给他，饼已经凉了，边缘却还是脆的。她问今天送了多少封信。邮差数了数，有地址的都送到了，没有地址的那封，也找到了一个还不错的去处。\n\n经过岔路时，他看见自己插下的短枝歪了。旁边的泥土拱起一点，露出一颗很小的芽。他蹲下，把枝重新扶直，没有替它取名字。那也许是一株花，也许只是常见的草；等它长出第二片叶子，再看也来得及。\n\n有人在路口问：“明天还出门吗？”邮差拍了拍鼓起来的种子口袋。他想把靴子的针脚补好，给渡口带一块新灯罩，还答应蜗牛描一张门槛附近的地图。回到家，他没有把这些写成一长列待办，只在旅行簿最后留了一页空白。\n\n明天的路，会从门口开始。']
     ] },
     { id: 'kitchen', title: '不太可靠的魔法厨房', chapters: [
       ['汤匙的意见', '汤匙说今天不适合煮汤。她问为什么，汤匙回答：因为昨天也是汤。'],
@@ -152,7 +152,7 @@
     if (kind === 'gather') a.material = s.home.pantry.herbs <= s.home.pantry.berries ? 'herbs' : 'berries';
     return a;
   }
-  function plan(s, previous, at) { const d = decision(s, at === undefined ? s.lastAdvancedAt : at, previous); return { ...spec(s, d.kind), decision: d }; }
+  function plan(s, previous, at) { const d = decision(s, at === undefined ? s.lastAdvancedAt : at, previous),a=spec(s,d.kind);if(a.kind==='help'){d.reasons=['想帮'+V.NPCS[a.jobId].name+'完成'+K.JOBS[a.jobId].name,...(s.country.coins<20?['也想攒一点买种子的钱']:[])];d.reason=d.reasons.join('；');}return{...a,decision:d}; }
   function fillQueue(s) {
     // Plans are wishes. Actual choices are re-evaluated against the world when an activity ends.
     const committed = s.queue.filter(a => a.kind === 'craft' || a.studyFragmentId);
@@ -304,7 +304,7 @@
   }
   function create(now) {
     now = time(now === undefined ? Date.now() : now);
-    const s = { version: 7, kitchen:K.fresh(), country:E.fresh(), avatar:C.fresh(), learning:{go:0}, hobbies:H.fresh(), arcadeProgress:A.cleanProgress(null), home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
+    const s = { version: 7, conversation:cleanConversation(), kitchen:K.fresh(), country:E.fresh(), avatar:C.fresh(), learning:{go:0}, hobbies:H.fresh(), arcadeProgress:A.cleanProgress(null), home:freshHome(), playbox:G.cleanBox(null), serial: 0, rng: hash('a-little-witch:' + now) || 1, createdAt: now, lastAdvancedAt: now,
       activity: null, queue: [], paused: [], books: BOOKS.map(b => ({ id: b.id, readCount: 0, lastReadAt: null })),
       fragments: [], creations: [], memories: [], preferences: { name: '新伙伴', curiosity: .78, bookish: .7, quiet: .62, utcOffsetMinutes:480 }, board: null, position: { x: 480, y: 895 }, lastBookId: null,
       world: { weather: '薄云', energy: 78, day: 0, hour: 0, lastUpdatedAt: now }, knowledge: [], events: [], plants: [], discoveries: [] };
@@ -388,6 +388,7 @@
     if(kind==='read'&&options.bookId){a.bookId=allowed(options.bookId,BOOKS.map(b=>b.id));a.title='在读《'+BOOKS.find(b=>b.id===a.bookId).title+'》';}
     if(H.ids.includes(kind))a.durationMs=60000;
     if(['cook','tidy','gather','birdwatch','stargaze','picnic','garden','market'].includes(kind))a.durationMs=90000;
+    if(kind==='help'&&row){row.reasons=['这会儿可以帮'+V.NPCS[a.jobId].name+K.JOBS[a.jobId].name];row.reason=row.reasons[0];}
     a.decision={reason:'你邀请她一起'+a.title.replace(/^一起/, '')+'；'+(row?row.reason:'想在日常里留一点共同的时间'),reasons:['你邀请她一起做这件事',...(row?row.reasons:[])],candidates:scores(s,now),sourceIds:[]};
     pause(s,now);start(s,a,now);fillQueue(s);return s.activity;
   }
@@ -544,12 +545,25 @@
     return { creation: c, sources, events: s.events.filter(e => e.sourceIds.some(id => sourceSet.has(id))), knowledge: s.knowledge.filter(k => k.sourceIds.some(id => sourceSet.has(id))), plant: s.plants.find(p => p.creationId === cid) || null };
   }
 
+  function cleanConversation(value) {
+    if(value===undefined)return{version:1,turns:[]};
+    if(!value||value.version!==1)throw Error('交谈记录版本不正确');
+    const turns=list(value.turns,40).map(t=>({id:cleanText(t.id,80),at:stamp(t.at),user:cleanText(t.user,600),reply:cleanText(t.reply,1600),suggestion:allowed(t.suggestion,['none','tea','read','garden','rest']),model:cleanText(t.model,100)}));
+    if(turns.some(t=>!/^[a-zA-Z0-9-]{16,80}$/.test(t.id)||!t.user.trim()||!t.reply.trim())||new Set(turns.map(t=>t.id)).size!==turns.length)throw Error('交谈记录不完整或重复');
+    return{version:1,turns};
+  }
+  function recordConversation(s,entry) {
+    if(s.conversation?.turns.some(t=>t.id===entry.id))return false;
+    const candidate=cleanConversation({version:1,turns:[...(s.conversation?.turns||[]),entry].slice(-40)});
+    if(new TextEncoder().encode(JSON.stringify({...s,conversation:candidate})).length>LIMITS.fileBytes)throw Error('存档空间不足，请先导出备份。');
+    s.conversation=candidate;return true;
+  }
   function validate(value, now) {
     now = time(now === undefined ? Date.now() : now);
     if (!value || typeof value !== 'object' || ![2,3,4,5,6,7].includes(value.version)) throw new Error('这不是当前版本的游戏存档');
     // Only whitelisted fields are copied; never merge imported objects into prototypes.
     const serial = number(value.serial, 0, 1000000000, '序号');
-    const s = { version: 7, kitchen:K.clean(value.kitchen), country:E.clean(value.country), avatar:C.clean(value.version<5?null:value.avatar,value.version<5), learning:{go:number(value.learning?.go||0,0,6,'教学进度')}, hobbies:H.clean(value.hobbies), arcadeProgress:A.cleanProgress(value.arcadeProgress), home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
+    const s = { version: 7, conversation:cleanConversation(value.conversation), kitchen:K.clean(value.kitchen), country:E.clean(value.country), avatar:C.clean(value.version<5?null:value.avatar,value.version<5), learning:{go:number(value.learning?.go||0,0,6,'教学进度')}, hobbies:H.clean(value.hobbies), arcadeProgress:A.cleanProgress(value.arcadeProgress), home:cleanHome(value.home), playbox:G.cleanBox(value.playbox), serial, rng: number(value.rng, 1, 4294967295, '随机状态'), createdAt: stamp(value.createdAt), lastAdvancedAt: stamp(value.lastAdvancedAt),
       activity: cleanActivity(value.activity), queue: list(value.queue, 12).map(a => cleanActivity(a, true)), paused: list(value.paused, 8).map(a => cleanActivity(a)),
       books: [], fragments: [], creations: [], memories: [], preferences: { utcOffsetMinutes: value.preferences && value.preferences.utcOffsetMinutes !== undefined ? number(value.preferences.utcOffsetMinutes,-840,840,'时区') : 480, name: cleanText(value.preferences && value.preferences.name || '小罗', 30), curiosity: number(value.preferences && value.preferences.curiosity === undefined ? .78 : value.preferences.curiosity, 0, 1, '性格'), bookish: number(value.preferences && value.preferences.bookish === undefined ? .7 : value.preferences.bookish, 0, 1, '性格'), quiet: number(value.preferences && value.preferences.quiet === undefined ? .62 : value.preferences.quiet, 0, 1, '性格') }, board: cleanBoard(value.board),
       position: { x: number(value.position && value.position.x, 0, 941, '位置'), y: number(value.position && value.position.y, 0, 1672, '位置') }, lastBookId: BOOKS.some(b => b.id === value.lastBookId) ? value.lastBookId : null,
@@ -651,5 +665,5 @@
     return result;
   }
   function exportState(s) { return JSON.stringify({ ...s, exportedAt: Date.now() }, null, 2); }
-  return { kitchenAction, create, advance, walkTo, residents, neighborAction, countryAction, setProfile, focusHobby, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
+  return { recordConversation, kitchenAction, create, advance, walkTo, residents, neighborAction, countryAction, setProfile, focusHobby, invite, homeAction, setClockOffset, recordMiniGame, holdGame, currentView, interrupt, resume, addFragment, acceptFragment, deferFragment, applyProposal, waterPlant, inspectCreation, decisionView: (s, now) => scores(s, now === undefined ? s.lastAdvancedAt : now, s.activity.kind), validate, exportState, BOOKS, LIMITS, MINUTE, HOUR };
 });

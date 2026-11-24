@@ -1,6 +1,6 @@
 # 状态与存档
 
-当前存档版本 `version:6`（接收v2/v3/v4/v5/v6）。以 `game/life.js` 的 validate 为最终可执行约束；本文给语义索引。
+当前存档版本 `version:7`（接收v2/v3/v4/v5/v6/v7）。以 `game/life.js` 的 validate 为最终可执行约束；本文给语义索引。
 
 | 字段 | 意义 |
 | --- | --- |
@@ -85,3 +85,10 @@ kitchen保存40种meals/cooked、eaten、12位居民jobDone/jobAt。activity.rec
 playbox新增festival-games的12个独立槽，保存kind/seed/level/moves及规范状态；导入重放并比较所有字段，限制4000个动作、横版18000帧。拼图接受13个图ID和3–6边长。
 
 postcard draft/letter记录sourceType、sourceAt、sourceFact或sourceQuote、theme、variant；生活来源为真实事件id，当前事件仍在时校验一致，历史滚出容量后保留来源快照。项目完工清除草稿与临时来源，成品保留完整引用。
+
+
+## v0.9 交谈记录（兼容schema7）
+
+可选字段conversation={version:1,turns:[]}；旧档缺省补空，外层schema与存储键不变。turns最多40条，每条id为16—80位字母数字/连字符、at为时间戳、user≤600字符、reply≤1600、model≤100、suggestion在none/tea/read/garden/rest中。拒绝重复ID、空正文、非法版本/长度/活动，导入只复制白名单。总存档仍受1.5MB限制。
+
+交谈仅说明双方说过什么，不能变成经历事实或凭空创建约定已完成。recordConversation只修改该子对象，不改rng、serial、库存、奖励或世界事件。导出包含这些对话，原始梦种仍独立保留。回退至v0.8旧程序会丢弃不认识的聊天字段，因此回退前先导出完整备份。

@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>AI UI 隔离验收</title><link rel="stylesheet" href="../game/living.css"><h1>AI UI 隔离验收 · 模拟接口</h1><pre id="results">RUNNING</pre><div id="sheet"><div id="host"></div></div><script src="../game/ai.js"></script><script src="../game/ai-ui.js"></script><script>
+(async()=>{
+ const output=document.getElementById('results'),host=document.getElementById('host'),sheet=document.getElementById('sheet'),A=WitchAI,U=WitchAIUI;
+ const saved=localStorage.getItem('witchlife-ai-connection-v1'),results=[];let calls=0,saves=0,invites=0,mode='ok',pending;
+ const assert=(v,m)=>{if(!v)throw Error(m);},tick=()=>new Promise(r=>setTimeout(r,0));
+ const state={activity:{bookId:'moss'},preferences:{name:'隔离测试伙伴'},conversation:{turns:[]}},L={currentView:()=>({title:'正在读书'}),recordConversation:(s,e)=>s.conversation.turns.push(e)};
+ A.context=()=>({allowedSuggestions:['none','read'],privacy:'隔离测试材料'});
+ A.request=async(url,token,path,payload,signal)=>{calls++;if(mode==='wait')return new Promise(resolve=>{pending={resolve,signal};});return{reply:'<img src=x onerror=alert(1)> 测试回复',suggestion:'read',model:'mock'};};
+ function button(text){return [...host.querySelectorAll('button')].find(x=>x.textContent===text);}
+ const setup=()=>U.chat(host,{state,L,save:async()=>{saves++;return mode!=='save-fail';},onSettings:()=>{},onInvite:()=>invites++});
+ async function send(){host.querySelector('textarea').value='测试消息';host.querySelector('input[type=checkbox]').checked=true;button('和她说').click();await tick();}
+ try{
+  U.settings(host);host.querySelector('input[type=password]').value='fixture-only-not-a-real-secret';button('保存连接').click();assert(!localStorage.getItem('witchlife-ai-connection-v1').includes('fixture-only'),'token persisted');results.push('PASS 仅地址进入浏览器存储');
+  setup();host.querySelector('textarea').value='测试';button('和她说').click();await tick();assert(calls===0,'consent bypassed');results.push('PASS 未勾选发送许可不会请求');
+  await send();assert(calls===1&&saves===1&&state.conversation.turns.length===1,'conversation not saved');assert(!host.querySelector('img'),'HTML executed');assert(invites===0,'auto action');results.push('PASS 回复按纯文本显示并保存，建议不自动执行');
+  button('一起接着读').click();assert(invites===1,'invitation not routed');results.push('PASS 玩家点击后才调用活动入口');
+  setup();assert(host.querySelector('.ai-messages').textContent.includes('测试回复'),'lost conversation');results.push('PASS 重新打开显示已有交谈');
+  mode='save-fail';await send();assert(host.querySelector('.ai-status').textContent.includes('保存失败'),'save falsely claimed');results.push('PASS 保存失败有明确提示');
+  mode='wait';setup();await send();sheet.hidden=true;await tick();assert(pending.signal.aborted,'close did not abort');const count=saves;pending.resolve({reply:'晚到回复',suggestion:'none',model:'mock'});await tick();assert(saves===count,'closed chat saved');sheet.hidden=false;results.push('PASS 关闭面板取消等待，迟到回复不写存档');
+ }catch(e){results.push('FAIL '+e.stack);}finally{if(saved===null)localStorage.removeItem('witchlife-ai-connection-v1');else localStorage.setItem('witchlife-ai-connection-v1',saved);output.textContent=results.join('\n');output.dataset.complete='true';}
+})();
+</script></html>

@@ -23,6 +23,7 @@
 | 口袋离线、明信片与两种新游戏 | [design/10-pocket-life-v7.md](design/10-pocket-life-v7.md) |
 | iPhone 安装、备份和更新 | [development/05-iphone-offline.md](development/05-iphone-offline.md) |
 | 下一批扩充内容 | [design/03-next-version.md](design/03-next-version.md) |
+| 画面、居民、阅读农事、AI与铛铛的最新检查提案 | [design/13-life-quality-and-ai-proposal.md](design/13-life-quality-and-ai-proposal.md) |
 | 每次改变了什么 | [CHANGELOG.md](CHANGELOG.md) |
 | 原画、美术提案、生成记录 | `../design/`；其中早期功能设想以本知识库为准 |
 | Agent应当遵循什么 | 根目录 [AGENTS.md](../AGENTS.md) |
@@ -35,3 +36,6 @@
 
 - [四季生活、厨房与居民 v0.8](design/12-seasons-v8.md)：本轮40作物/40食谱/12居民/30书/22游戏的规则。
 - [v0.8验收与交付](development/07-v8-verification.md)：测试结果、隔离夹具与发布检查。
+
+- [v0.9生活与AI验收](development/08-ai-life-v9-verification.md)：新接口、旧档、桌宠及真实联网边界。
+- [AI连接与手机部署](../server/README.md)：本机助手、Cloudflare、口令与用量。

@@ -8,3 +8,11 @@ desktop/smoke-fixture-*/
 design/references/
 tests/test-data/
 .DS_Store
+node_modules/
+.wrangler/
+.dev.vars*
+.env*
+__pycache__/
+
+/启动梦乡.exe
+/desktop/smoke-results.json

@@ -93,3 +93,10 @@ seasons.js维护40作物/24鱼的内容及季节、熟练度、出没条件；co
 letters.js选择已发生事件/梦种并固化来源，hobbies.js保持三步草稿，postcards.js只绘制与导出。festival-games.js为12种新增游戏的纯规则，festival-ui.js为输入/渲染，统一接入playbox。横版60Hz离散物理、最多18000帧，保存压缩输入并回放校验；飞行棋由独立种子决定骰子。
 
 第三块forest区域1536×1152，入口与街区相连，12位居民按日程移动；terrain.js只绘制场地，不改变碰撞事实。所有自主选择继续保留开工时因果理由。地图点田经步行抵达，调用同一农事入口。
+
+
+## v0.9 可选在线表达
+
+ai.js只组装有限事实、检索聊天并校验回复；ai-ui.js负责材料预览、同意、取消和呈现。ai-core.js统一服务端提示与供应商协议；ai-server.js是本机Node入口，cloudflare/worker.mjs是在线入口及持久额度。聊天记录conversation独立于events/memories，模型从不直接写入世界。四个提议必须通过原invite接口。
+
+个人部署使用随机访问口令，模型密钥在本机DPAPI或Cloudflare Secret中。无自动后台AI、多人账户和云存档。显式桌宠便笺通过带鉴权的/pet写固定本机信匣，由独立适配器读入，云端此路由明确拒绝。具体数据与部署见server/README.md。

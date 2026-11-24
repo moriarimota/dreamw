@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string]$ProjectRoot = '',
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$')]
@@ -54,6 +54,21 @@ function Add-PackageFile {
 # This list is deliberately explicit. Do not replace it with a zip of the project
 # or game folder: both can contain personal saves, logs, and development fixtures.
 $requiredRuntimeFiles = @(
+    'server/ai-server.js',
+    'server/ai-core.js',
+    'server/README.md',
+    'tools/start-ai.ps1',
+    'tools/deploy-ai.ps1',
+    '启动AI助手.cmd',
+    '部署手机AI.cmd',
+    'server/cloudflare/worker.mjs',
+    'server/cloudflare/wrangler.jsonc',
+    'server/cloudflare/package.json',
+    'server/cloudflare/package-lock.json',
+    'integrations/dangdang/dreamw_bridge.py',
+    'game/ai.js',
+    'game/ai-ui.js',
+    'game/living.css',
     'game/kitchen.js',
     'game/library.js',
     'game/life-ui.js',

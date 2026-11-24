@@ -19,9 +19,21 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify life, saves, AI boundaries and offline assets
+        run: |
+          node tests/life-tests.js
+          node tests/storage-tests.js
+          node tests/offline-tests.js
+          node --test tests/ai-tests.js tests/cloudflare-tests.mjs
+          python tests/dangdang-bridge-tests.py
+          node tools/verify-v7-runtime.js
       - name: Stage only the playable game
         run: |
           mkdir -p public/assets public/vendor
+          cp game/ai.js game/ai-ui.js game/living.css public/
           cp game/seasons.js game/letters.js game/festival-games.js game/festival-ui.js game/field-ui.js game/seasons.css public/
           cp game/kitchen.js game/library.js game/life-ui.js public/
           cp game/pocket-games.js game/pocket-ui.js game/postcards.js game/offline.js game/offline-worker.js game/offline-manifest.js game/details.css game/icon-192.png game/icon-512.png game/apple-touch-icon.png public/

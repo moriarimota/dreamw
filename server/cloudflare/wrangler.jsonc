@@ -1,0 +1,15 @@
+{
+  "name": "dreamw-ai",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-24",
+  "workers_dev": true,
+  "send_metrics": false,
+  "observability": { "enabled": false },
+  "vars": {
+    "DREAMW_AI_MODEL": "deepseek-flash",
+    "DREAMW_DAILY_LIMIT": "80",
+    "DREAMW_ALLOWED_ORIGINS": "https://moriarimota.github.io"
+  },
+  "durable_objects": { "bindings": [{ "name": "LIMITS", "class_name": "DreamwLimits" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DreamwLimits"] }]
+}
