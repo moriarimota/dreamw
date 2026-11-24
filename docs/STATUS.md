@@ -1,6 +1,6 @@
 # 当前项目状态
 
-版本：《梦乡》v0.9.0，2026-11-24已完成本机实现与验证，等待GitHub Pages发布确认。本页是当前状态总表。
+版本：《梦乡》v0.9.0，2026-11-24已发布到GitHub Pages并完成公网核对。本页是当前状态总表。
 
 ## 本轮改变
 
@@ -14,9 +14,9 @@
 
 主项目D:/WitchLife，桌面启动程序已在本机重新编译。双击“启动AI助手.cmd”配置电脑AI；“部署手机AI.cmd”用于个人Cloudflare Free账号。说明见[AI助手](../server/README.md)。没有迁入旧电脑的user-data/state.json，也未替换真实世界。
 
-本机Git Credential Manager已识别moriarimota，远程推送预演成功。不能再把连接器的只读权限误认为本机Git没有上传权限。
+本机Git Credential Manager已识别moriarimota，已将游戏提交7899037ec6fa72e9cf811c8e807afa3d87f4f282推送至main。[Pages #8](https://github.com/moriarimota/dreamw/actions/runs/45371235757)检查与部署成功。
 
-手机游戏地址：https://moriarimota.github.io/dreamw/ 。发布完成前仍以公网实际版本为准。更新程序不会自动同步个人世界；手机和电脑继续使用导出/导入。
+手机游戏地址：https://moriarimota.github.io/dreamw/ 。公网浏览器已确认“离线已就绪 · v0.9.0 · 65 项素材”；旧入口可在设置中检查游戏更新。68个公开可请求资源已核对，内容与发布提交一致（本机部分文件仅CRLF/LF换行不同）。更新程序不会自动同步个人世界；手机和电脑继续使用导出/导入。
 
 ## 验证
 
